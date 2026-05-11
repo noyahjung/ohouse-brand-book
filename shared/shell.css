@@ -1,0 +1,1190 @@
+/* ──────────────────────────────────────────────────────────
+ * shell.css — Brand Book shell. Header (64px) + left sidebar
+ * (260px) + scrollable content column (800px max). Base layout
+ * comes first; About / Brand-tier / Asset-page rules follow.
+ * ────────────────────────────────────────────────────────── */
+
+/* ═══ Base shell ═══════════════════════════════════════════ */
+/* ──────────────────────────────────────────────────────────
+ * shell.css — shared chrome for the Ohouse Visual Asset Library
+ *
+ * Layout: fixed top header (64px) + fixed left sidebar (260px) +
+ * scrollable main content. Visual language modeled on seed-design's
+ * docs site (white BG, neutral grays, indigo accent, generous spacing).
+ * ────────────────────────────────────────────────────────── */
+
+:root {
+  --bg:           #ffffff;
+  --bg-soft:      #fafafa;
+  --bg-mute:      #f5f5f7;
+  --border:       #e5e7eb;
+  --border-soft:  #f1f3f5;
+
+  --text:         #111827;
+  --text-dim:     #4b5563;
+  --text-mute:    #9ca3af;
+
+  --accent:       #111827;
+  --accent-hover: #374151;
+  --accent-soft:  rgba(17, 24, 39, 0.06);
+
+  --header-h:     64px;
+  --sidebar-w:    260px;
+  --content-max:  800px;
+
+  --radius:       8px;
+  --radius-sm:    6px;
+  --transition:   0.15s ease;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard Variable', Pretendard, Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Content body links keep an always-on underline so they remain
+ * recognizable now that the accent color matches body text. */
+.shell-content a:not(.cta-btn) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--text-mute);
+}
+.shell-content a:not(.cta-btn):hover {
+  text-decoration-color: var(--accent);
+}
+
+code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+  background: var(--bg-mute);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.shell-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 50;
+}
+.shell-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.shell-header-brand:hover { text-decoration: none; }
+.shell-header-brand img {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+
+.shell-sidebar {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-w);
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  overflow-y: auto;
+  padding: 24px 16px 40px;
+  z-index: 40;
+}
+
+.shell-nav-section + .shell-nav-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-soft);
+}
+.shell-nav-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  padding: 4px 12px 12px;
+  margin: 0;
+}
+
+.shell-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+}
+.shell-nav-link:hover {
+  background: var(--bg-soft);
+  color: var(--text);
+  text-decoration: none;
+}
+.shell-nav-link.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* Sub-grouped nav items (e.g. Graphic Assets → Icon / 2D / …)
+ * Subgroup label is a non-clickable category divider that sits
+ * one tier below the section title (ASSETS) but one tier above
+ * its own leaves. Uppercase + muted color reads as "this is a
+ * group, not a link"; leaves indent so the parent/child relation
+ * is visible at a glance. */
+.shell-nav-subgroup {
+  margin: 8px 0 4px;
+}
+.shell-nav-subgroup-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 10px 12px 6px;
+}
+.shell-nav-subgroup .shell-nav-link {
+  padding-left: 24px;
+}
+
+.shell-nav-tag {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-mute);
+  background: var(--border-soft);
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+/* ── Main content ────────────────────────────────────────── */
+
+.shell-main {
+  margin-left: var(--sidebar-w);
+  padding: calc(var(--header-h) + 64px) 64px 96px;
+  min-height: 100vh;
+}
+.shell-content {
+  max-width: var(--content-max);
+}
+
+.shell-breadcrumb {
+  font-size: 13px;
+  color: var(--text-mute);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+.shell-breadcrumb a {
+  color: var(--text-mute);
+}
+.shell-breadcrumb a:hover {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.shell-breadcrumb span + span::before {
+  content: '/';
+  margin: 0 8px;
+  color: var(--text-mute);
+  opacity: 0.5;
+}
+
+/* ── Typography ──────────────────────────────────────────── */
+
+.shell-content h1 {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+  color: var(--text);
+  line-height: 1.2;
+}
+.shell-content h2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 56px 0 16px;
+  color: var(--text);
+  padding-top: 8px;
+  border-top: 1px solid var(--border-soft);
+}
+.shell-content h2:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+.shell-content h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 36px 0 12px;
+  color: var(--text);
+}
+.shell-content p {
+  margin: 0 0 16px;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.75;
+}
+.shell-content ul, .shell-content ol {
+  padding-left: 22px;
+  color: var(--text-dim);
+  margin: 0 0 16px;
+}
+.shell-content li {
+  margin-bottom: 6px;
+  line-height: 1.75;
+}
+.shell-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 14px;
+}
+.shell-content th, .shell-content td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.shell-content th {
+  font-weight: 600;
+  background: var(--bg-soft);
+  color: var(--text);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.shell-content td {
+  color: var(--text-dim);
+}
+
+.shell-content .lead {
+  font-size: 17px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  margin: 0 0 36px;
+}
+
+/* ── Page banner ──────────────────────────────────────────
+ * Wide horizontal hero image below each Asset category's
+ * intro text. Drop in a real image either as a child
+ * <img class="page-banner-img"> or as a `background-image` on
+ * the container. The placeholder variant displays the target
+ * dimensions until the real asset is ready. */
+.page-banner {
+  width: 100%;
+  aspect-ratio: 8 / 3;
+  margin: 32px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-soft);
+  background-size: cover;
+  background-position: center;
+}
+.page-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.page-banner--placeholder {
+  border: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-soft);
+}
+.page-banner-hint {
+  text-align: center;
+  color: var(--text-mute);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 24px;
+}
+.page-banner-hint strong {
+  display: block;
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: -0.005em;
+}
+
+/* ── Overview section block ──────────────────────────────
+ * Wraps Graphic Assets / Photographic Assets so the two
+ * asset families read as distinct chapters of the page
+ * rather than one long stream of headings. */
+.overview-section {
+  margin-top: 64px;
+  padding-top: 48px;
+  border-top: 2px solid var(--border);
+}
+.overview-section:first-of-type {
+  margin-top: 32px;
+  padding-top: 0;
+  border-top: 0;
+}
+.overview-section > h2 {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+  font-size: 26px;
+}
+.overview-section > h2 + p {
+  font-size: 15px;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+}
+
+/* ── Asset thumbnail row ─────────────────────────────────
+ * 5-column grid of square placeholders for Overview's
+ * Graphic / Photographic asset listings. Replace each
+ * `.asset-thumb` with an <img> when the real asset image is
+ * ready. */
+.asset-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 16px 0 36px;
+}
+.asset-thumb {
+  aspect-ratio: 1;
+  background: var(--bg-soft);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.asset-thumb:has(img) {
+  background: #fff;
+  border: 1px solid var(--border-soft);
+}
+.asset-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 18%;
+}
+
+/* ── Overview feature: 3-column format grid ──────────────
+ * Layout-only — text styles inherit shell defaults so this
+ * section reads like the rest of the library. Just a 3-up
+ * grid with placeholder image slots underneath the column
+ * headings. */
+.overview-feature-formats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+.format-col h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+.format-col-img {
+  aspect-ratio: 1;
+  background: var(--bg-soft);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.format-col-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .overview-feature-formats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Library grid ────────────────────────────────────────
+ * Card-style thumbnail grid for asset libraries (e.g. Pattern
+ * / Background page). Each card shows a 16:9 cover preview
+ * with the asset name and a download CTA below. */
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
+.library-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color var(--transition), transform var(--transition);
+}
+.library-item:hover {
+  border-color: var(--text-mute);
+  transform: translateY(-2px);
+}
+.library-item-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--bg-soft);
+}
+.library-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.library-item-meta h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.005em;
+  border-top: 0;
+  padding-top: 0;
+}
+.library-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background var(--transition);
+  white-space: nowrap;
+}
+.library-download:hover {
+  background: var(--accent-hover);
+  text-decoration: none;
+  color: #fff;
+}
+.library-download svg {
+  display: block;
+}
+
+/* ── Inline status pills for h3 headings ───────────────── */
+.status-tag {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 9px;
+  background: var(--border-soft);
+  color: var(--text-mute);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  vertical-align: middle;
+  position: relative;
+  top: -2px;
+}
+.status-note {
+  color: var(--text-mute);
+  font-size: 13px;
+  margin: -8px 0 32px;
+}
+
+/* ── Usage guide (Do / Don't) ────────────────────────────
+ * Per-asset usage examples. Bullet summary above, two
+ * color-coded panels below: Do (green) / Don't (red). Each
+ * card holds an image slot + caption — author fills these in
+ * post-scaffold. */
+.usage-guide {
+  margin-top: 56px;
+  padding-top: 8px;
+}
+.usage-guide-points {
+  padding-left: 20px;
+  margin: 0 0 32px;
+}
+.usage-guide-points li {
+  margin-bottom: 8px;
+  color: var(--text-dim);
+  line-height: 1.75;
+  font-size: 15px;
+}
+
+/* Each principle = its own row with a paired Do / Don't case */
+.usage-principle {
+  margin-top: 32px;
+}
+.usage-principle:first-of-type {
+  margin-top: 16px;
+}
+.usage-principle-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.usage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.usage-col {
+  border-radius: 12px;
+  padding: 24px;
+}
+.usage-col--do {
+  background: rgba(0, 161, 255, 0.09); /* Genuine Blue tint */
+}
+.usage-col--dont {
+  background: rgba(239, 68, 68, 0.08);
+}
+.usage-col-label {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.usage-col--do .usage-col-label {
+  background: rgba(0, 161, 255, 0.20);
+  color: #0369a1;
+}
+.usage-col--dont .usage-col-label {
+  background: rgba(239, 68, 68, 0.18);
+  color: #b91c1c;
+}
+
+.usage-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.usage-card {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+}
+.usage-card-img {
+  aspect-ratio: 4 / 3;
+  background: var(--bg-soft);
+  display: block;
+}
+.usage-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.usage-card-text {
+  padding: 12px 14px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .usage-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Placeholder block (used for "content TBD" sections) ── */
+
+.placeholder-block {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 40px 32px;
+  text-align: center;
+  color: var(--text-mute);
+  background: var(--bg-soft);
+  margin: 24px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.placeholder-block strong {
+  display: block;
+  color: var(--text-dim);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+/* ── CTA button ──────────────────────────────────────────── */
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--transition), transform var(--transition);
+}
+.cta-btn:hover {
+  background: var(--accent-hover);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+/* ── Footer ──────────────────────────────────────────────
+ * Sits below the main content; mirrors the sidebar offset so
+ * its left edge lines up with the page text rather than the
+ * viewport. Two stacked rows: link nav + copyright. */
+.shell-footer {
+  margin-left: var(--sidebar-w);
+  padding: 32px 64px 48px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.shell-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 20px;
+}
+.shell-footer-nav a {
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.shell-footer-nav a:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+.shell-footer-copy {
+  color: var(--text-mute);
+  font-size: 13px;
+  letter-spacing: -0.005em;
+}
+
+/* ── Responsive (basic) ─────────────────────────────────── */
+
+@media (max-width: 900px) {
+  :root {
+    --sidebar-w: 220px;
+  }
+  .shell-main {
+    padding: calc(var(--header-h) + 40px) 32px 64px;
+  }
+  .shell-content h1 { font-size: 28px; }
+  .shell-content h2 { font-size: 20px; }
+}
+@media (max-width: 640px) {
+  .shell-sidebar {
+    display: none;  /* mobile nav not in scope yet — placeholder phase */
+  }
+  .shell-main {
+    margin-left: 0;
+    padding: calc(var(--header-h) + 32px) 20px 56px;
+  }
+  .shell-footer {
+    margin-left: 0;
+    padding: 24px 20px 32px;
+  }
+  .shell-footer-nav {
+    gap: 16px 20px;
+  }
+}
+
+/* ═══ Brand Book additions (formerly shell-v2.css) ═════════ */
+
+/* ── Header v1↔v2 indicator ─────────────────────────────── */
+
+.shell-header-version {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.shell-header-version-current {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.shell-header-version-link {
+  color: var(--text-mute);
+}
+.shell-header-version-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ── Color stage — animated palette composition ─────────────
+ * Shares the same footprint as .about-banner (content-max wide,
+ * 16:9, soft border) so the Color page opens with the same
+ * surface size as the other Brand-tier hero images. The stage
+ * is a non-interactive motion piece: photos pop in first
+ * (z-index 1), then color chips on top (z-index 10) so the
+ * chips are never covered. After each layer settles, every item
+ * drifts gently in place. Two transforms (entry translateY,
+ * continuous float) live on different DOM levels so they don't
+ * stomp each other.
+ *
+ * Honours `prefers-reduced-motion`: animations resolve to the
+ * final state immediately for users who opt out. */
+.color-stage {
+  position: relative;
+  width: 100%;
+  max-width: var(--content-max);
+  aspect-ratio: 16 / 9;
+  margin: 0 0 32px;
+  background: #f5f5f7;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.color-stage-canvas {
+  position: absolute;
+  inset: 0;
+}
+.color-item {
+  position: absolute;
+  opacity: 0;
+  transform: translateY(28px);
+  animation: color-pop 0.9s cubic-bezier(.2,.8,.2,1) var(--delay, 0s) forwards;
+  will-change: transform, opacity;
+}
+.color-item-float {
+  animation: color-float 5.5s ease-in-out var(--float-delay, 0s) infinite;
+  will-change: transform;
+}
+.color-item-float img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+.color-photo { z-index: 1; }
+.color-chip  { z-index: 10; }
+.color-chip .color-item-float img {
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+@keyframes color-pop {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes color-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .color-item       { opacity: 1; transform: none; animation: none; }
+  .color-item-float { animation: none; }
+}
+
+/* Per-element positions, tuned to mirror the layout in
+ * assets/overview_asset/color_pic/guide.png. Coordinates are
+ * percentages of the 16:9 stage so they scale with viewport. */
+[data-color-item="sky"]      { top:  8%; left:  4%; width: 26%; }
+[data-color-item="lamp"]     { top: 26%; left: 33%; width: 24%; }
+[data-color-item="tomatoes"] { top:  4%; left: 60%; width: 18%; }
+[data-color-item="green"]    { top: 50%; left: 16%; width: 22%; }
+[data-color-item="figs"]     { top: 48%; left: 64%; width: 30%; }
+
+[data-color-item="c1"]       { top:  8%; left: 80%; width: 13%; }
+[data-color-item="c2"]       { top:  3%; left: 32%; width: 13%; }
+[data-color-item="c3"]       { top: 28%; left: 22%; width: 13%; }
+[data-color-item="c4"]       { top: 18%; left: 50%; width: 13%; }
+[data-color-item="c5"]       { top: 60%; left:  4%; width: 13%; }
+[data-color-item="c6"]       { top: 78%; left: 40%; width: 13%; }
+
+/* About hero banner — sits at the very top of the About page.
+ * Constrained to the 800px content column so it aligns with the
+ * breadcrumb and hero text that follow, instead of breaking out
+ * the way .vl-stage does. */
+.about-banner {
+  width: 100%;
+  max-width: var(--content-max);
+  aspect-ratio: 16 / 9;
+  margin: 0 0 32px;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.about-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── About / Mission editorial layout ───────────────────── */
+
+.about-hero {
+  padding: 24px 0 8px;
+}
+.about-hero h1 {
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px;
+}
+.about-lead {
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0 0 56px;
+}
+
+.about-section {
+  border-top: 1px solid var(--border-soft);
+  padding: 40px 0;
+}
+.about-section:last-of-type {
+  border-bottom: 1px solid var(--border-soft);
+}
+.about-section h2 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin: 0 0 16px;
+}
+.about-section h3 {
+  font-size: 24px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+  color: var(--text);
+}
+.about-section p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 0 0 14px;
+}
+.about-section p:last-child {
+  margin-bottom: 0;
+}
+
+.about-meta {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 13px;
+  color: var(--text-mute);
+}
+
+/* ── Principles list (4-up editorial grid) ──────────────── */
+
+.principles-grid {
+  display: grid;
+  gap: 32px;
+  margin: 32px 0 48px;
+}
+.principle-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 32px;
+  padding: 28px 0;
+  border-top: 1px solid var(--border-soft);
+}
+.principle-row:last-child {
+  border-bottom: 1px solid var(--border-soft);
+}
+.principle-row-head {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.principle-row-head .principle-num {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-mute);
+}
+.principle-row-body h3 {
+  font-size: 24px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+.principle-row-body .principle-ko {
+  font-size: 14px;
+  color: var(--text-mute);
+  margin: 0 0 18px;
+}
+.principle-row-body p {
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 12px;
+}
+.principle-row-body .principle-expression {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--bg-soft);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 720px) {
+  .principle-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* ── Asset showcase gallery ─────────────────────────────── */
+
+.showcase-intro {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0 0 40px;
+}
+
+/* Showcase grid is a fixed 5×2 placeholder layout — every tile is
+ * an empty 1:1 slot that later gets `<img>` injected when real
+ * assets are ready. Keep the tile count at 10 so the silhouette
+ * stays consistent across asset types. */
+.showcase-gallery {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 0 0 56px;
+}
+.showcase-tile {
+  aspect-ratio: 1 / 1;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.showcase-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .showcase-gallery { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) {
+  .showcase-gallery { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Showcase note (small editorial caption beneath gallery) ── */
+
+.showcase-note {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  padding: 16px 18px;
+  background: var(--bg-soft);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Asset page sections ────────────────────────────────── */
+
+.asset-section {
+  border-top: 1px solid var(--border-soft);
+  padding: 48px 0;
+}
+.asset-section:last-of-type {
+  border-bottom: 1px solid var(--border-soft);
+}
+.asset-section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  margin: 0 0 12px;
+}
+.asset-section h2 {
+  font-size: 28px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  margin: 0 0 24px;
+}
+.asset-section p {
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+
+/* Form Principles — formal decisions unique to one asset type.
+ * Each principle is a horizontal row: text on the left (title +
+ * short rule + body) and an image placeholder on the right. The
+ * placeholder accepts an inline <img> when real visuals land.
+ * Rows are separated by hairline dividers; no card backgrounds. */
+.asset-tenets {
+  margin-top: 16px;
+}
+.asset-tenet {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  padding: 40px 0;
+  border-top: 1px solid var(--border-soft);
+  align-items: start;
+}
+.asset-tenet:last-child {
+  border-bottom: 1px solid var(--border-soft);
+}
+.asset-tenet-content h3 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin: 0 0 14px;
+}
+.asset-tenet-rule {
+  width: 32px;
+  height: 1px;
+  border: 0;
+  background: var(--text);
+  margin: 0 0 16px;
+}
+.asset-tenet-content p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+  margin: 0;
+  max-width: none;
+}
+.asset-tenet-image {
+  aspect-ratio: 4 / 3;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.asset-tenet-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .asset-tenet {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 28px 0;
+  }
+}
+
+/* Workflow — ordered production steps. */
+.asset-workflow {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  max-width: var(--content-max);
+}
+.asset-workflow-step {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.asset-workflow-step:last-child {
+  border-bottom: 0;
+}
+.asset-workflow-num {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-mute);
+  padding-top: 2px;
+}
+.asset-workflow-step h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  letter-spacing: -0.005em;
+}
+.asset-workflow-step p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: none;
+}
+
+/* Spec list — small key/value pairs (variant counts, formats etc.) */
+.asset-spec {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px 24px;
+  margin-top: 16px;
+  max-width: var(--content-max);
+  font-size: 14px;
+}
+.asset-spec dt {
+  color: var(--text-mute);
+  font-weight: 500;
+}
+.asset-spec dd {
+  margin: 0;
+  color: var(--text);
+}
+@media (max-width: 720px) {
+  .asset-spec { grid-template-columns: 1fr; gap: 4px 0; }
+  .asset-spec dd { margin-bottom: 12px; }
+}

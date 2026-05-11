@@ -1,0 +1,4365 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>[OHOUSE] Material Test — Frosted Palette</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2300B26B'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --accent: #111827;
+    --accent-light: rgba(17,24,39,0.07);
+    --bg: #f0f2f5;
+    --card: #ffffff;
+    --card-hover: #f8f9fb;
+    --card-active: #f0f2f5;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --text: #1e293b;
+    --text-dim: #64748b;
+    --text-mute: #94a3b8;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    --radius: 8px;
+    --radius-sm: 5px;
+    --font: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --transition: .2s cubic-bezier(.4,0,.2,1);
+  }
+  html, body {
+    margin: 0; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+  #app { position: fixed; inset: 0; }
+
+  #adminBadge {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 101;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #fff;
+    background: #E07A1F;
+    border-radius: 999px;
+    pointer-events: none;
+    user-select: none;
+    display: none;
+    font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  }
+  #adminBadge.visible { display: block; }
+
+  #dragHint {
+    position: fixed;
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(0, 0, 0, 0.28);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 5;
+    white-space: nowrap;
+  }
+  #dragHint.visible { opacity: 1; }
+
+  /* ── Shared card shell ───────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+  .section-label {
+    font-size: 10px; letter-spacing: .12em; color: var(--text-mute);
+    text-transform: uppercase; font-weight: 500;
+    padding: 0 4px 6px;
+  }
+
+  /* ── Left column: palette ───────────────────────────── */
+  #palette {
+    position: fixed; top: 18px; left: 18px; z-index: 10;
+    display: flex; flex-direction: column; gap: 14px;
+    width: 230px;
+  }
+  .palette-group { display: flex; flex-direction: column; gap: 4px; }
+
+  .palette-category {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .palette-category-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px 6px;
+    background: transparent; border: 0;
+    cursor: pointer; font-family: inherit;
+    font-size: 10px; letter-spacing: .12em; color: var(--text-mute);
+    text-transform: uppercase; font-weight: 600;
+    transition: color var(--transition);
+  }
+  .palette-category-header:hover { color: var(--text-dim); }
+  .palette-category-header .arrow {
+    font-size: 8px; transition: transform .2s;
+    display: inline-block;
+  }
+  .palette-category.collapsed .arrow { transform: rotate(-90deg); }
+  .palette-category.collapsed .palette-category-items { display: none; }
+  .palette-category-items { display: flex; flex-direction: column; gap: 4px; }
+  .palette-category-header.active-category {
+    color: var(--accent);
+  }
+  .palette-category-header .cat-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,.08);
+    flex: 0 0 auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  }
+  .cat-thumb.frosted-thumb {
+    background:
+      radial-gradient(ellipse at 30% 25%, rgba(255,255,255,.7) 0%, transparent 55%),
+      linear-gradient(180deg, #EBEFFF 0%, #00a1ff 100%);
+  }
+  .cat-thumb.bf-thumb {
+    background:
+      radial-gradient(ellipse at 30% 25%, rgba(180,140,255,.8) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 75%, rgba(10,0,30,.6) 0%, transparent 60%),
+      linear-gradient(135deg, #7c4dff 0%, #3a0a6e 60%, #1a0040 100%);
+  }
+
+  /* ── Standalone BF button (no category wrapper) ──── */
+  .bf-standalone {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    background: transparent; border: 0;
+    cursor: pointer; font-family: inherit;
+    font-size: 10px; letter-spacing: .12em; color: var(--text-mute);
+    text-transform: uppercase; font-weight: 600;
+    transition: color var(--transition);
+    border-radius: var(--radius-sm);
+  }
+  .bf-standalone:hover { color: var(--text-dim); }
+  .bf-standalone.active {
+    color: var(--accent);
+  }
+  .bf-standalone .cat-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,.08);
+    flex: 0 0 auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  }
+
+  .chip {
+    display: flex; align-items: stretch;
+    background: rgba(255,255,255,.92);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm); overflow: hidden;
+    transition: background var(--transition), border-color var(--transition);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .chip:hover { background: rgba(255,255,255,.96); }
+  .chip.active { background: rgba(17,24,39,.12); border-color: rgba(17,24,39,.3); }
+  .chip.active .swatch { color: var(--text); }
+  .chip .swatch {
+    flex: 1;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: transparent; color: var(--text-dim); border: 0; cursor: pointer;
+    font-size: 12px; font-weight: 500; letter-spacing: .01em;
+    text-align: left; font-family: inherit;
+  }
+  .chip.active .swatch::before {
+    content: ''; width: 3px; align-self: stretch; margin: -10px 0 -10px -12px;
+    background: var(--accent); border-radius: 2px 0 0 2px;
+  }
+  .chip .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.1);
+    background: linear-gradient(180deg, var(--top), var(--bot));
+    flex: 0 0 auto;
+  }
+  .chip .gear {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; background: transparent; color: var(--text-mute); border: 0;
+    border-left: 1px solid var(--border);
+    cursor: pointer; font-size: 13px; transition: color var(--transition), background var(--transition);
+  }
+  .chip .gear:hover { background: rgba(0,0,0,.03); color: var(--text); }
+  .chip.settings-open .gear { background: var(--accent-light); color: var(--accent); }
+  .chip.builtin .swatch { cursor: default; }
+  .chip.builtin .swatch:hover { color: var(--text-dim); }
+  .chip .dot.chrome { background: linear-gradient(180deg, #e2e4e8, #9ea2a8); border-color: rgba(0,0,0,.1); }
+  .chip .dot.glass  { background: linear-gradient(180deg, #eef4ff, #c0d8f5); border-color: rgba(0,0,0,.1); }
+  .chip .dot.bf-purple { background: linear-gradient(180deg, #7b3fe4, #2a0a52); border-color: rgba(0,0,0,.2); }
+  .chip .rec-tag {
+    align-self: center;
+    margin-right: 6px;
+    font-size: 8px; letter-spacing: .1em; font-weight: 600;
+    text-transform: uppercase; color: var(--accent);
+    background: var(--accent-light); border: 1px solid rgba(17,24,39,.25);
+    border-radius: 3px; padding: 2px 5px; white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* ── Settings panel ─────────────────────────────────── */
+  #settings {
+    position: fixed; top: 18px; left: 264px; z-index: 10;
+    padding: 14px 16px; min-width: 260px;
+    font-size: 12px; line-height: 1.6;
+    background: rgba(255,255,255,.92); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  #settings[hidden] { display: none; }
+  #settings h1 {
+    font-size: 11px; margin: 0 0 10px;
+    letter-spacing: .08em; color: var(--text-mute);
+    text-transform: uppercase; font-weight: 600;
+  }
+  #settings label {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; margin: 6px 0; color: var(--text-dim); font-size: 11px;
+  }
+  #settings input[type=range] {
+    width: 130px; accent-color: var(--accent);
+  }
+  #settings input[type=color] {
+    width: 44px; height: 22px; padding: 0;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: transparent; cursor: pointer;
+  }
+  #settings .val {
+    color: var(--text); min-width: 36px; text-align: right;
+    font-variant-numeric: tabular-nums; font-size: 11px; font-weight: 500;
+  }
+  #settings .val.hex {
+    font-size: 10px; color: var(--text-mute); min-width: 60px;
+  }
+  #settings .row { display: flex; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  #settings button {
+    flex: 1; background: var(--card); color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 7px 10px; cursor: pointer; font-size: 11px; font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+    font-family: inherit;
+  }
+  #settings button:hover { background: var(--card-hover); color: var(--text); }
+
+  /* ── Right column: assets + export ──────────────────── */
+  #assets {
+    position: fixed; top: 18px; right: 18px; z-index: 10;
+    display: flex; flex-direction: column; gap: 4px; align-items: stretch;
+    width: 180px;
+  }
+  .asset-chip {
+    text-align: left;
+    background: rgba(255,255,255,.92);
+    color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: .01em;
+    font-family: inherit;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .asset-chip:hover { background: rgba(255,255,255,.96); color: var(--text); }
+  .asset-chip.active {
+    background: var(--accent-light); color: var(--accent);
+    border-color: rgba(17,24,39,.3);
+    position: relative; font-weight: 600;
+  }
+  .asset-chip.active::before {
+    content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+    background: var(--accent); border-radius: 2px 0 0 2px;
+  }
+
+  .back-btn {
+    margin-bottom: 10px;
+    text-align: center; font-weight: 500;
+    color: var(--text-mute);
+  }
+  .back-btn:hover { color: var(--text); }
+  .back-btn::before { display: none !important; }
+
+  #exportPng {
+    margin-top: 14px;
+    background: var(--accent); color: #fff; border-color: transparent;
+    font-weight: 600; text-align: center;
+    box-shadow: 0 4px 14px rgba(17,24,39,.25);
+  }
+  #exportPng:hover { background: #374151; color: #fff; }
+  #exportPng.active { background: var(--accent); color: #fff; }
+  #exportPng.active::before { display: none; }
+
+  /* Admin mode: collapsible asset chip list so the settings panel gets
+     more vertical breathing room. Section label becomes the toggle. */
+  #assets.admin-collapsible .section-label {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  #assets.admin-collapsible .section-label:hover { background: rgba(0,0,0,0.04); }
+  #assets.admin-collapsible .section-label::after {
+    content: '▾';
+    margin-left: auto;
+    font-size: 9px;
+    color: var(--text-mute);
+    transition: transform 0.2s;
+  }
+  #assets.admin-collapsible.collapsed .section-label::after {
+    transform: rotate(-90deg);
+  }
+  #assets.admin-collapsible.collapsed .asset-chip[data-asset] {
+    display: none;
+  }
+
+  #assetSettings {
+    margin-top: 14px; padding: 12px 14px;
+    background: rgba(255,255,255,.92); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    font-size: 11px; line-height: 1.6;
+  }
+  #assetSettings[hidden] { display: none; }
+  #assetSettings .section-label {
+    font-size: 10px; letter-spacing: .08em; color: var(--text-mute);
+    text-transform: uppercase; font-weight: 600; margin-bottom: 8px;
+  }
+  #assetSettings label {
+    display: flex; flex-direction: column; gap: 4px;
+    color: var(--text-dim); font-size: 11px;
+  }
+  #assetSettings input[type=range] { width: 100%; accent-color: var(--accent); }
+  #assetSettings .val {
+    align-self: flex-end; color: var(--text);
+    font-variant-numeric: tabular-nums; font-weight: 500;
+  }
+  #assetSettings .capture-row {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  #assetSettings .row-label {
+    font-size: 10px; color: var(--text-mute);
+    letter-spacing: .04em; text-transform: uppercase; font-weight: 600;
+  }
+  #assetSettings .capture-list { display: flex; flex-direction: column; gap: 4px; }
+  #assetSettings .capture-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-areas:
+      "label val save reset"
+      "full  full full full";
+    align-items: center; gap: 4px 6px;
+    padding: 4px 0;
+  }
+  #assetSettings .capture-item + .capture-item { border-top: 1px dashed var(--border); }
+  #assetSettings .capture-label {
+    grid-area: label;
+    font-size: 10px; color: var(--text-dim); font-weight: 500;
+  }
+  #assetSettings .capture-val {
+    grid-area: val;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 9px; color: var(--text-mute);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  #assetSettings .capture-val.overridden { color: var(--accent); }
+  #assetSettings .capture-full {
+    grid-area: full;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 10px; color: var(--text);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 4px 6px;
+    cursor: text; user-select: all; -webkit-user-select: all;
+    word-break: break-all;
+  }
+  #assetSettings .capture-btn[data-action="save"]  { grid-area: save;  }
+  #assetSettings .capture-btn[data-action="reset"] { grid-area: reset; }
+  #assetSettings .capture-btn {
+    background: var(--card); color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 3px 8px; cursor: pointer; font-size: 10px; font-weight: 500;
+    font-family: inherit; transition: background var(--transition), color var(--transition);
+  }
+  #assetSettings .capture-btn:hover { background: var(--card-hover); color: var(--text); }
+  #assetSettings .capture-btn.reset { padding: 3px 6px; color: var(--text-mute); }
+  #assetSettings .capture-btn.reset:disabled {
+    opacity: .35; cursor: default; background: var(--card);
+  }
+  #assetSettings .thumbnail-tools { display: flex; gap: 4px; }
+  #assetSettings .thumbnail-tools .capture-btn { flex: 1; }
+  #assetSettings .thumbnail-hint {
+    font-size: 9px; color: var(--text-mute); line-height: 1.4;
+  }
+  #assetSettings .thumbnail-hint code {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    background: var(--card); padding: 1px 4px; border-radius: 3px;
+    font-size: 9px;
+  }
+
+  /* ── Footer elements ────────────────────────────────── */
+  #hint {
+    position: fixed; bottom: 14px; left: 18px; z-index: 10;
+    font-size: 11px; color: var(--text-mute); letter-spacing: .01em;
+  }
+
+  /* ── Background selector ───────────────────────────── */
+  #bgSelector {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 10;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.92); border: 1px solid var(--border);
+    border-radius: 999px; padding: 6px 12px 6px 14px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  #bgSelector .section-label {
+    padding: 0; margin: 0;
+    font-size: 10px; letter-spacing: .12em; color: var(--text-mute);
+    font-weight: 500; text-transform: uppercase;
+  }
+  #bgSelector .bg-swatch {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.12);
+    cursor: pointer; padding: 0; background: transparent;
+    position: relative; transition: transform .12s;
+  }
+  #bgSelector .bg-swatch:hover { transform: scale(1.1); }
+  #bgSelector .bg-swatch.active {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  /* ── View selector ─────────────────────────────────── */
+  #viewSelector {
+    position: fixed; bottom: 56px; left: 50%; transform: translateX(-50%); z-index: 10;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.92); border: 1px solid var(--border);
+    border-radius: 999px; padding: 6px 12px 6px 14px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  #viewSelector .section-label {
+    padding: 0; margin: 0;
+    font-size: 10px; letter-spacing: .12em; color: var(--text-mute);
+    font-weight: 500; text-transform: uppercase;
+  }
+  #viewSelector .view-btn {
+    min-width: 28px; height: 22px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 5px; color: var(--text-dim);
+    font-family: inherit; font-size: 11px; font-weight: 500;
+    cursor: pointer; padding: 0 6px;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  #viewSelector .view-btn:hover { background: var(--card-hover); color: var(--text); }
+  #viewSelector .view-btn.active {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+
+  #bgSelector .divider {
+    width: 1px; align-self: stretch;
+    background: var(--border); margin: 0 2px;
+  }
+  #bgSelector .toggle {
+    display: flex; align-items: center; gap: 8px;
+    background: transparent; border: 0; padding: 0;
+    cursor: pointer; font-family: inherit;
+    font-size: 10px; letter-spacing: .12em; color: var(--text-mute);
+    font-weight: 500; text-transform: uppercase;
+  }
+  #bgSelector .toggle .switch {
+    width: 28px; height: 16px; border-radius: 999px;
+    background: #cbd5e1; position: relative;
+    transition: background .15s;
+  }
+  #bgSelector .toggle .switch::after {
+    content: ''; position: absolute;
+    top: 2px; left: 2px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #fff;
+    transition: left .15s, background .15s;
+  }
+  #bgSelector .toggle.on .switch { background: var(--accent); }
+  #bgSelector .toggle.on .switch::after { left: 14px; background: #fff; }
+  #bgSelector .toggle.on { color: var(--text); }
+  /* ── Landing page ───────────────────────────────────── */
+  #landing {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg);
+    overflow: auto;
+    padding: 60px 40px;
+  }
+  #landing .inner { max-width: 1100px; margin: 0 auto; }
+  #landing header { text-align: center; margin-bottom: 48px; }
+  #landing h1 {
+    font-size: 24px; font-weight: 700; color: var(--text);
+    margin: 0 0 8px; letter-spacing: -.02em;
+  }
+  #landing .subtitle {
+    font-size: 13px; color: var(--text-mute); margin: 0;
+    letter-spacing: .01em;
+  }
+  #landing .loading {
+    text-align: center; color: var(--text-mute);
+    font-size: 12px; padding: 80px 0;
+    letter-spacing: .05em;
+  }
+  #landing .search {
+    max-width: 480px; margin: 0 auto 32px;
+    position: relative;
+  }
+  #landing .search input {
+    width: 100%; box-sizing: border-box;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 11px 38px 11px 38px;
+    color: var(--text); font-family: inherit;
+    font-size: 13px; letter-spacing: .01em;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  #landing .search input::placeholder { color: var(--text-mute); }
+  #landing .search input:focus {
+    outline: 0; border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  #landing .search .icon {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    color: var(--text-mute); pointer-events: none;
+  }
+  #landing .search .clear {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: transparent; border: 0; color: var(--text-mute);
+    cursor: pointer; padding: 6px; font-size: 14px; line-height: 1;
+    border-radius: 4px;
+  }
+  #landing .search .clear:hover { color: var(--text); background: rgba(0,0,0,.04); }
+  #landing .search .clear[hidden] { display: none; }
+  #landing .empty {
+    text-align: center; color: var(--text-mute);
+    font-size: 13px; padding: 60px 0;
+  }
+  #landing .empty[hidden] { display: none; }
+  #landing .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  #landing .asset-card {
+    background: var(--card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 16px;
+    cursor: pointer; font-family: inherit;
+    transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    display: flex; flex-direction: column; gap: 14px;
+    text-align: left;
+    box-shadow: var(--shadow-sm);
+  }
+  #landing .asset-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(17,24,39,.3);
+    box-shadow: var(--shadow-md);
+  }
+  #landing .asset-card .thumb {
+    aspect-ratio: 1; border-radius: 6px;
+    background: #ffffff;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #landing .asset-card .thumb img {
+    width: 100%; height: 100%; object-fit: contain;
+  }
+  #landing .asset-card .label {
+    font-size: 14px; font-weight: 600; color: var(--text);
+    letter-spacing: -.005em;
+  }
+  #landing .asset-card .rec {
+    font-size: 10px; color: var(--text-mute);
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-top: -10px;
+  }
+  #landing .asset-card .rec .dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; vertical-align: middle;
+    margin-right: 6px; border: 1px solid rgba(0,0,0,.1);
+  }
+  #landing.hidden { display: none; }
+
+  #projectBadge {
+    position: fixed; top: 18px; left: 18px; z-index: 110;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px; font-weight: 500; letter-spacing: -0.01em;
+    padding: 8px 14px 8px 12px;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+    transition: background var(--transition), color var(--transition);
+  }
+  #projectBadge:hover { background: #fff; color: var(--text); }
+  #projectBadge img { width: 18px; height: 18px; display: block; }
+  #projectBadge .arrow { color: var(--text-mute); }
+
+  /* ── Principles mode: hide customizer chrome ────── */
+  body.principles-mode #palette,
+  body.principles-mode #assets,
+  body.principles-mode #settings,
+  body.principles-mode #viewSelector,
+  body.principles-mode #bgSelector,
+  body.principles-mode #hint,
+  body.principles-mode #projectBadge { display: none !important; }
+  /* Embed mode (?embed=principles) — running inside the Visual Language
+   * page's iframe. Drop the back-to-library button (no library to go
+   * back to from inside the parent page) and the page title (parent
+   * provides its own H1). Manual nav arrows + dots remain available. */
+  body.principles-embed { background: #ffffff !important; }
+  body.principles-embed #principlesClose,
+  body.principles-embed #principles .page-title { display: none !important; }
+  /* Until the parent posts `principles:start`, slide 0 is pre-loaded
+   * silently (asset + text positioned) but kept fully transparent so
+   * the iframe reads as a clean white frame with nothing inside.
+   * On start, both the WebGL canvas and the slideshow chrome fade in
+   * together for a single coherent reveal. */
+  body.principles-embed canvas,
+  body.principles-embed #principles {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  body.principles-embed.principles-shown canvas,
+  body.principles-embed.principles-shown #principles {
+    opacity: 1;
+  }
+
+  /* ── Variants mode (?mode=variants) — temporary tone-comparison
+     view used for team alignment on material direction. Hides every
+     piece of the customizer / landing chrome and pins a compact panel
+     to the right edge with asset, color, and tone selectors. ───── */
+  body.variants-mode #landing,
+  body.variants-mode #palette,
+  body.variants-mode #assets,
+  body.variants-mode #settings,
+  body.variants-mode #viewSelector,
+  body.variants-mode #bgSelector,
+  body.variants-mode #hint,
+  body.variants-mode #dragHint,
+  body.variants-mode #projectBadge,
+  body.variants-mode #principles,
+  body.variants-mode #app { display: none !important; }
+
+  /* Multi-asset stage: 2 cells on top, 3 cells on bottom. Each cell
+     hosts its own renderer/scene/camera; all share the global frosted
+     material so slider edits propagate to every cell at once. */
+  #variantsStage { display: none; }
+  body.variants-mode #variantsStage {
+    display: grid;
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    bottom: 24px;
+    right: 332px;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    z-index: 5;
+  }
+  body.variants-mode #variantsStage > .variants-stage-cell {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  body.variants-mode #variantsStage > .variants-stage-cell:nth-child(1) { grid-column: 1 / 4; grid-row: 1; }
+  body.variants-mode #variantsStage > .variants-stage-cell:nth-child(2) { grid-column: 4 / 7; grid-row: 1; }
+  body.variants-mode #variantsStage > .variants-stage-cell:nth-child(3) { grid-column: 1 / 3; grid-row: 2; }
+  body.variants-mode #variantsStage > .variants-stage-cell:nth-child(4) { grid-column: 3 / 5; grid-row: 2; }
+  body.variants-mode #variantsStage > .variants-stage-cell:nth-child(5) { grid-column: 5 / 7; grid-row: 2; }
+  .variants-stage-cell canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .variants-stage-label {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #variantsPanel { display: none; }
+  body.variants-mode #variantsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    bottom: 24px;
+    width: 280px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: saturate(180%) blur(8px);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    z-index: 100;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+  }
+  .variants-title {
+    font-size: 14px; font-weight: 700; color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .variants-subtitle {
+    font-size: 12px; color: var(--text-mute);
+    margin-top: -14px;
+  }
+  .variants-group { display: flex; flex-direction: column; gap: 8px; }
+  .variants-group-label {
+    font-size: 10px; font-weight: 700;
+    color: var(--text-mute); text-transform: uppercase;
+    letter-spacing: 0.10em;
+  }
+  .variants-chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .variants-chip {
+    padding: 6px 12px; border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 999px;
+    font-family: inherit; font-size: 12px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+  }
+  .variants-chip:hover { background: #fff; color: var(--text); }
+  .variants-chip.active {
+    background: var(--accent); color: #fff;
+    border-color: var(--accent);
+  }
+  .variants-controls { display: flex; flex-direction: column; gap: 9px; }
+  .variants-row {
+    display: grid;
+    grid-template-columns: 96px 1fr 36px;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .variants-row label {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: -0.005em;
+  }
+  .variants-row.is-color { grid-template-columns: 96px 36px 1fr; }
+  .variants-row .variants-color-swatch {
+    width: 36px;
+    padding: 0;
+  }
+  .variants-row .variants-hex-input {
+    height: 26px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--text);
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    outline: none;
+  }
+  .variants-row .variants-hex-input:focus {
+    border-color: var(--accent);
+  }
+  .variants-row input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+  .variants-row input[type="color"] {
+    width: 100%;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    padding: 1px;
+  }
+  .variants-row .variants-value {
+    font-size: 11px;
+    color: var(--text-mute);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .variants-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .variants-actions-row {
+    display: flex;
+    gap: 6px;
+  }
+  .variants-actions-row .variants-action {
+    flex: 1;
+  }
+  .variants-action {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+  }
+  .variants-action:hover {
+    background: #fff;
+    color: var(--text);
+  }
+  .variants-action--primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .variants-action--primary:hover {
+    background: var(--accent-hover);
+    color: #fff;
+    border-color: var(--accent-hover);
+  }
+  .variants-action[disabled] {
+    opacity: 0.7;
+    cursor: default;
+  }
+
+  /* ── Principles button on landing ──────────────── */
+  .principles-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 20px;
+    background: var(--accent-light); border: none;
+    border-radius: var(--radius-sm); padding: 10px 20px;
+    color: var(--accent); font-family: inherit;
+    font-size: 13px; font-weight: 600; letter-spacing: .01em;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+  .principles-btn:hover {
+    background: var(--accent); color: #fff;
+  }
+
+  /* ── Principles overlay ────────────────────────── */
+  #principles { position: fixed; inset: 0; z-index: 100; display: none; }
+  #principles.active { display: block; }
+
+  #principles .page-title {
+    position: absolute; top: 32px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: .12em; color: var(--text-mute);
+    text-transform: uppercase; font-weight: 500; z-index: 10;
+    white-space: nowrap;
+  }
+  #principles .close-btn {
+    position: absolute; top: 28px; left: 28px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 16px;
+    color: var(--text-dim); font-family: inherit;
+    font-size: 12px; font-weight: 500; cursor: pointer; z-index: 10;
+    transition: background var(--transition), color var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+  #principles .close-btn:hover { background: var(--card-hover); color: var(--text); }
+
+  #principles .slide-text {
+    position: absolute; bottom: 60px; left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    max-width: 480px; width: 100%;
+    text-align: center;
+    opacity: 0;
+    transition: opacity .6s ease, transform .6s ease;
+    pointer-events: none;
+    z-index: 10;
+  }
+  #principles .slide-text.visible {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+  #principles .slide-text .num {
+    font-size: 11px; letter-spacing: .14em; font-weight: 600;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+  }
+  #principles .slide-text h2 {
+    font-size: 28px; font-weight: 700; color: var(--text);
+    margin: 0 0 4px; letter-spacing: -.02em; line-height: 1.2;
+  }
+  #principles .slide-text .en {
+    font-size: 12px; color: var(--text-mute); margin: 0 0 10px;
+    letter-spacing: .02em;
+  }
+  #principles .slide-text .desc {
+    font-size: 13px; color: var(--text-dim); line-height: 1.7; margin: 0;
+  }
+
+  #principles .nav-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 50%; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 20px;
+    cursor: pointer; z-index: 10; font-family: inherit;
+    transition: background var(--transition), color var(--transition), opacity .2s;
+    box-shadow: var(--shadow-sm);
+  }
+  #principles .nav-arrow:hover { background: var(--card-hover); color: var(--text); }
+  #principles .nav-arrow.prev { left: 28px; }
+  #principles .nav-arrow.next { right: 28px; }
+  #principles .nav-arrow[disabled] { opacity: .25; pointer-events: none; }
+
+  /* ── Mock phone UI (slide 3 — 명확성) ─────────── */
+  #mockPhoneUI {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    z-index: 5; pointer-events: none;
+    opacity: 0;
+  }
+  .mock-phone-frame {
+    width: 320px;
+    background: #fff;
+    border-radius: 32px;
+    padding: 16px 16px 100px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.05);
+  }
+  .mock-status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px 20px;
+    font-size: 13px; font-weight: 600; color: #333;
+  }
+  .mock-status-icons { display: flex; gap: 4px; align-items: center; }
+  .mock-status-icons span {
+    display: inline-block; width: 14px; height: 10px;
+    border-radius: 2px; background: #333;
+  }
+  .mock-banner {
+    display: flex; align-items: center; gap: 14px;
+    background: #f5f5f7;
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .mock-banner-icon {
+    width: 80px; height: 80px; flex-shrink: 0;
+    border-radius: 12px;
+    background-size: 85%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #f0f2f5;
+  }
+  .mock-banner-body { flex: 1; min-width: 0; }
+  .mock-banner-title {
+    font-size: 13px; font-weight: 500; color: #333; line-height: 1.4;
+  }
+  .mock-banner-cta {
+    font-size: 14px; font-weight: 700; color: #35c5f0; margin-top: 3px;
+  }
+  .mock-banner-x {
+    font-size: 16px; color: #bbb; align-self: flex-start; margin-top: -2px;
+  }
+
+  #principles .nav-dots {
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 10;
+  }
+  #principles .nav-dots button {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); border: 0; padding: 0;
+    cursor: pointer; transition: background .2s, transform .2s;
+  }
+  #principles .nav-dots button.active {
+    background: var(--accent); transform: scale(1.4);
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="adminBadge">ADMIN MODE</div>
+<div id="dragHint">마우스를 드래그해 에셋을 돌려보세요</div>
+
+<div id="landing">
+  <div class="inner">
+    <header>
+      <h1>3D Asset Library</h1>
+      <p class="subtitle">Select an asset to customize</p>
+    </header>
+    <div class="loading">Generating previews…</div>
+    <div class="search" hidden>
+      <span class="icon">⌕</span>
+      <input id="searchInput" type="search" placeholder="Search assets" autocomplete="off" spellcheck="false" />
+      <button class="clear" id="searchClear" hidden title="Clear">✕</button>
+    </div>
+    <div class="grid" hidden></div>
+    <div class="empty" hidden>No matching assets.</div>
+  </div>
+</div>
+
+<div id="variantsPanel">
+  <div class="variants-title">Tone Variants</div>
+  <div class="variants-subtitle">재질 5종 × Blue/Red 두 컬러를 커스터마이즈</div>
+
+  <div class="variants-group">
+    <div class="variants-group-label">Variant</div>
+    <div class="variants-chip-row" id="variantsKeyRow">
+      <button class="variants-chip active" data-variant="A">A재질</button>
+      <button class="variants-chip" data-variant="B">B재질</button>
+      <button class="variants-chip" data-variant="C">C재질</button>
+      <button class="variants-chip" data-variant="D">D재질</button>
+      <button class="variants-chip" data-variant="E">E재질</button>
+    </div>
+  </div>
+
+  <div class="variants-group">
+    <div class="variants-group-label">Color</div>
+    <div class="variants-chip-row" id="variantsColorRow">
+      <button class="variants-chip active" data-color="blue">Blue</button>
+      <button class="variants-chip" data-color="red">Red</button>
+    </div>
+  </div>
+
+  <div class="variants-group">
+    <div class="variants-group-label">그림자</div>
+    <div class="variants-chip-row" id="variantsShadowRow">
+      <button class="variants-chip active" data-shadow="off">Off</button>
+      <button class="variants-chip" data-shadow="on">On</button>
+    </div>
+  </div>
+
+  <div class="variants-group">
+    <div class="variants-group-label" id="variantsControlsLabel">A재질 · Blue — Material Settings</div>
+    <div class="variants-controls" id="variantsControls"></div>
+  </div>
+
+  <div class="variants-actions">
+    <button id="variantsSet" class="variants-action variants-action--primary" type="button">Set as default</button>
+    <div class="variants-actions-row">
+      <button id="variantsReset" class="variants-action" type="button">Reset</button>
+      <button id="variantsRestore" class="variants-action" type="button">원래대로</button>
+    </div>
+    <button id="variantsExport" class="variants-action" type="button">현재 재질 PNG 다운로드</button>
+  </div>
+</div>
+
+<div id="variantsStage"></div>
+
+<div id="principles">
+  <span class="page-title">오늘의집 3D 에셋 조형 원칙</span>
+  <button class="close-btn" id="principlesClose">← 라이브러리</button>
+
+  <div class="slide-text" data-slide="0">
+    <div class="num">01 — Smoothing Line</div>
+    <h2>부드러움</h2>
+    <p class="en">Smoothing Line</p>
+    <p class="desc">브랜드 심볼의 외형을 닮은 곡선으로 조형적 부드러움을 유지합니다. 모서리와 면의 라운딩으로 각진 단면을 지양합니다.</p>
+  </div>
+  <div class="slide-text" data-slide="1">
+    <div class="num">02 — 유저의 영감과 꿈</div>
+    <h2>다정함</h2>
+    <p class="en">Warmth &amp; Dream</p>
+    <p class="desc">브랜드의 다정한 정서와 꿈의 분위기를 담습니다. 은은한 Vertical Gradient와 약간의 투명한 질감으로 표현합니다.</p>
+  </div>
+  <div class="slide-text" data-slide="2">
+    <div class="num">03 — 실현</div>
+    <h2>명확성</h2>
+    <p class="en">Realization</p>
+    <p class="desc">꿈을 실제로 보여준다는 가치를 보조하기 위해, 작은 화면에서도 또렷이 읽히는 형태를 갖춥니다. 군더더기 없는 명확한 실루엣, 단순한 매스.</p>
+  </div>
+  <div class="slide-text" data-slide="3">
+    <div class="num">04 — 자세 (Attitude)</div>
+    <h2>안정감</h2>
+    <p class="en">Stability</p>
+    <p class="desc">위 세 가지에 신뢰와 확신을 더하기 위한 단단하고 안정적인 무게감을 유지합니다. 지면에 또렷이 붙은 그림자로 표현합니다.</p>
+  </div>
+
+  <div id="mockPhoneUI">
+    <div class="mock-phone-frame">
+      <div class="mock-status-bar">
+        <span>9:41</span>
+        <div class="mock-status-icons"><span></span><span></span><span></span></div>
+      </div>
+      <div class="mock-banner">
+        <div class="mock-banner-icon" id="mockIcon"></div>
+        <div class="mock-banner-body">
+          <div class="mock-banner-title">관리된 파트너와 함께하는 이사</div>
+          <div class="mock-banner-cta">무료로 이사 견적 받기</div>
+        </div>
+        <span class="mock-banner-x">✕</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="nav-arrow prev" id="principlesPrev">‹</button>
+  <button class="nav-arrow next" id="principlesNext">›</button>
+  <div class="nav-dots">
+    <button class="active" data-slide="0"></button>
+    <button data-slide="1"></button>
+    <button data-slide="2"></button>
+    <button data-slide="3"></button>
+  </div>
+</div>
+
+<div id="palette">
+  <div class="palette-group">
+    <div class="palette-category" data-category="basic">
+      <button class="palette-category-header active-category">
+        <span class="cat-thumb frosted-thumb"></span>
+        <span class="arrow">▼</span> 기본 재질
+      </button>
+      <div class="palette-category-items">
+        <div class="chip active" data-mat="frostedBlue" data-mat-type="frosted" style="--top:#EBEFFF; --bot:#00a1ff;">
+          <button class="swatch"><span class="dot"></span> Genuine Blue</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip" data-mat="frostedGreen" data-mat-type="frosted" style="--top:#EDFFF4; --bot:#19BD86;">
+          <button class="swatch"><span class="dot"></span> Jade Green</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip" data-mat="frostedOrange" data-mat-type="frosted" style="--top:#FFF4EC; --bot:#FF752C;">
+          <button class="swatch"><span class="dot"></span> Mango Orange</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip" data-mat="frostedRed" data-mat-type="frosted" style="--top:#FFEFEF; --bot:#FF4747;">
+          <button class="swatch"><span class="dot"></span> Coral Red</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip" data-mat="frostedViolet" data-mat-type="frosted" style="--top:#F7EFFD; --bot:#C475F5;">
+          <button class="swatch"><span class="dot"></span> Violet</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip" data-mat="frostedDarkBlue" data-mat-type="frosted" style="--top:#E8EEFB; --bot:#2C65CF;">
+          <button class="swatch"><span class="dot"></span> Dark Blue</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip" data-mat="frostedPink" data-mat-type="frosted" style="--top:#FFF0F4; --bot:#FF6E92;">
+          <button class="swatch"><span class="dot"></span> Candy Pink</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:0;">
+      <button class="bf-standalone" id="bfButton" data-mat="blackFriday" data-mat-type="blackFriday">
+        <span class="cat-thumb bf-thumb"></span>
+        블랙프라이데이 재질
+      </button>
+      <button class="gear bf-gear" id="bfGear" title="Settings" style="
+        background:transparent; border:0; color:var(--text-mute);
+        cursor:pointer; font-size:13px; padding:6px 8px;
+        transition: color .2s;
+      ">⚙</button>
+    </div>
+
+    <div class="palette-category admin-only" data-category="builtin">
+      <button class="palette-category-header">
+        <span class="cat-thumb" style="background:linear-gradient(180deg,#888,#333);"></span>
+        <span class="arrow">▼</span> 관리자: 내장 재질
+      </button>
+      <div class="palette-category-items">
+        <div class="chip builtin" data-mat="glass" data-mat-type="glass">
+          <button class="swatch"><span class="dot" style="background:linear-gradient(180deg,#fff,#d6eaff);"></span> Glass</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip builtin" data-mat="chrome" data-mat-type="chrome">
+          <button class="swatch"><span class="dot" style="background:linear-gradient(180deg,#f5f5f7,#9ea2a8);"></span> Chrome</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip builtin" data-mat="lensGlass" data-mat-type="lensGlass">
+          <button class="swatch"><span class="dot" style="background:linear-gradient(180deg,#fff,#bcd4e9);"></span> Lens Glass</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+        <div class="chip builtin" data-mat="cameraLens" data-mat-type="cameraLens">
+          <button class="swatch"><span class="dot" style="background:linear-gradient(180deg,#3a3a40,#0a0a10);"></span> Camera Lens</button>
+          <button class="gear" title="Settings">⚙</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="settings" hidden>
+  <h1 id="settingsTitle">Frosted Blue</h1>
+  <div id="controls"></div>
+  <div class="row">
+    <button id="resetPreset">Reset</button>
+  </div>
+</div>
+
+<div id="assets">
+  <button id="backToLibrary" class="asset-chip back-btn">← Library</button>
+  <div class="section-label">Asset</div>
+  <button class="asset-chip active" data-asset="box">Moving Box</button>
+  <button class="asset-chip" data-asset="coupon">Coupon</button>
+  <button class="asset-chip" data-asset="purifier">Water Purifier</button>
+  <button class="asset-chip" data-asset="gift">Gift Box</button>
+  <button class="asset-chip" data-asset="basket">Basket</button>
+  <button class="asset-chip" data-asset="clock">Clock</button>
+  <button class="asset-chip" data-asset="camera">Camera</button>
+  <button class="asset-chip" data-asset="packagebox">Package Box</button>
+  <button class="asset-chip" data-asset="lightning">Lightning</button>
+  <button class="asset-chip" id="exportPng">PNG 출력</button>
+
+  <div id="assetSettings" hidden>
+    <div class="section-label">Asset Settings</div>
+    <label>Gradient Y Shift
+      <input type="range" id="gradYShift" min="-1" max="1" step="0.01" value="0">
+      <span id="gradYShiftVal" class="val">0.00</span>
+    </label>
+    <div class="capture-row">
+      <span class="row-label">Library Thumbnails</span>
+      <div class="thumbnail-tools">
+        <button id="exportThumbCurrent" class="capture-btn">Save current as PNG</button>
+        <button id="exportThumbAll" class="capture-btn">Export all (View 1)</button>
+      </div>
+      <span class="thumbnail-hint">Save into <code>librarythumbnail/&lt;id&gt;.png</code>.</span>
+    </div>
+
+    <div class="capture-row">
+      <span class="row-label">Camera Views (per asset)</span>
+      <div class="capture-list">
+        <div class="capture-item" data-view="1">
+          <span class="capture-label">View 1</span>
+          <span class="capture-val"></span>
+          <button class="capture-btn" data-action="save">Save</button>
+          <button class="capture-btn reset" data-action="reset" title="Use default">×</button>
+          <code class="capture-full" title="Click to select, copy with Cmd+C"></code>
+        </div>
+        <div class="capture-item" data-view="2">
+          <span class="capture-label">View 2</span>
+          <span class="capture-val"></span>
+          <button class="capture-btn" data-action="save">Save</button>
+          <button class="capture-btn reset" data-action="reset" title="Use default">×</button>
+          <code class="capture-full" title="Click to select, copy with Cmd+C"></code>
+        </div>
+        <div class="capture-item" data-view="3">
+          <span class="capture-label">View 3</span>
+          <span class="capture-val"></span>
+          <button class="capture-btn" data-action="save">Save</button>
+          <button class="capture-btn reset" data-action="reset" title="Use default">×</button>
+          <code class="capture-full" title="Click to select, copy with Cmd+C"></code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="hint">드래그로 회전 · 휠로 줌 · 우클릭 드래그로 팬</div>
+
+<div id="viewSelector">
+  <span class="section-label">디자이너 추천 뷰</span>
+  <button class="view-btn active" data-view="1" title="Isometric">1</button>
+  <button class="view-btn" data-view="2" title="Slight Top-Down">2</button>
+  <button class="view-btn" data-view="3" title="Side">3</button>
+</div>
+
+<div id="bgSelector">
+  <span class="section-label">BG</span>
+  <button class="bg-swatch active" data-bg="#ffffff" style="background:#ffffff;" title="White"></button>
+  <button class="bg-swatch"        data-bg="#f5f5f5" style="background:#f5f5f5;" title="Light Gray"></button>
+  <button class="bg-swatch"        data-bg="#000000" style="background:#000000;" title="Black"></button>
+  <span class="divider"></span>
+  <button class="toggle" id="shadowToggle" title="Toggle shadow">
+    <span>Shadow</span>
+    <span class="switch"></span>
+  </button>
+</div>
+<a id="projectBadge" href="../index.html" title="Brand Book 홈으로">
+  <span class="arrow">←</span>
+  <img src="../logo.svg" alt="">
+  <span>Brand Book</span>
+</a>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+import { PRINCIPLES_SLIDES } from './slides.js';
+import {
+  FROSTED_PRESET,
+  FROSTED_VARIANTS,
+  HARMONY_BY_BODY,
+  HARMONY2_BY_BODY,
+  BLACK_FRIDAY_PRESET,
+  createFrosted,
+  createBlackFriday,
+  createLuminanceWhite,
+  createRibbonGray,
+  createGlass,
+  createChrome,
+  makeVerticalGradient,
+  remapUVsToWorldY,
+} from './materials.js';
+
+// ── Admin mode: ?admin=true shows gear buttons & settings panel
+const IS_ADMIN = new URLSearchParams(window.location.search).has('admin');
+if (IS_ADMIN) {
+  // Swap the green-circle favicon for a tool emoji so admin tabs are
+  // visually distinguishable from end-user tabs in the browser bar.
+  const adminFavicon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text x='4' y='52' font-size='52'>🛠</text></svg>`
+  );
+  document.querySelector('link[rel=icon]').setAttribute('href', adminFavicon);
+  document.getElementById('adminBadge').classList.add('visible');
+
+  // Collapse the asset chip list behind the "Asset" section label so the
+  // long admin settings panel gets the vertical space it needs. Clicking
+  // the label toggles; picking an asset auto-collapses again.
+  const assetsEl = document.getElementById('assets');
+  const assetSectionLabel = assetsEl.querySelector('.section-label');
+  assetsEl.classList.add('admin-collapsible', 'collapsed');
+  assetSectionLabel.addEventListener('click', () => {
+    assetsEl.classList.toggle('collapsed');
+  });
+  assetsEl.querySelectorAll('.asset-chip[data-asset]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      assetsEl.classList.add('collapsed');
+    });
+  });
+}
+if (!IS_ADMIN) {
+  document.querySelectorAll('.gear, .bf-gear').forEach(el => el.style.display = 'none');
+  document.getElementById('settings').style.display = 'none';
+  // Built-in material chips are admin tooling only — they expose
+  // material params not meant for end users (camera lens, lens glass,
+  // raw glass/chrome).
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+}
+
+const app = document.getElementById('app');
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+app.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#ffffff');
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+// Temporary environment until the HDR loads so the scene isn't flat-black.
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.02).texture;
+scene.environmentIntensity = 1.0;
+
+// Keep the raw equirect HDR alive (no `hdr.dispose()`) so variants
+// mode can re-generate PMREMs in its per-slot renderers — PMREM
+// textures are bound to the GL context they were generated in, so
+// the main renderer's PMREM can't be sampled correctly from the
+// slot renderers (visible as a blue cast on transmissive bodies).
+let loadedHdrTexture = null;
+const slotPmremCallbacks = [];
+
+new RGBELoader().load('Botanical_Gardens_2_quarter.hdr', (hdr) => {
+  hdr.mapping = THREE.EquirectangularReflectionMapping;
+  loadedHdrTexture = hdr;
+  const envTex = pmrem.fromEquirectangular(hdr).texture;
+  // Previous room env → dispose to reclaim GPU memory.
+  scene.environment?.dispose?.();
+  scene.environment = envTex;
+  // Chrome & Black Friday get the same HDR directly — crisp natural reflections.
+  chromeMat.envMap = envTex;
+  chromeMat.needsUpdate = true;
+  materials.blackFriday.envMap = envTex;
+  materials.blackFriday.needsUpdate = true;
+  // Variants mode slots may have already initialized with a fallback
+  // env (PMREM'd RoomEnvironment) — let them swap in the HDR PMREM
+  // now that it's available.
+  while (slotPmremCallbacks.length) slotPmremCallbacks.shift()(hdr);
+}, undefined, (err) => console.error('HDR load failed', err));
+
+
+let frustumSize = 400;
+const aspect = window.innerWidth / window.innerHeight;
+const camera = new THREE.OrthographicCamera(
+  -frustumSize * aspect / 2,  frustumSize * aspect / 2,
+   frustumSize / 2,          -frustumSize / 2,
+  -5000, 5000,
+);
+camera.position.set(400, 320, 480);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 0, 0);
+
+// ── Material registry: instantiate each variant once, keep their
+// per-variant state so toggling doesn't reset tuning.
+const materials = {
+  frostedBlue:     createFrosted('frostedBlue'),
+  frostedGreen:    createFrosted('frostedGreen'),
+  frostedOrange:   createFrosted('frostedOrange'),
+  frostedRed:      createFrosted('frostedRed'),
+  frostedViolet:   createFrosted('frostedViolet'),
+  frostedDarkBlue: createFrosted('frostedDarkBlue'),
+  frostedPink:     createFrosted('frostedPink'),
+  blackFriday:     createBlackFriday(),
+};
+// Built-in material chips — not exposed in the palette UI.
+const tapeMat      = createLuminanceWhite();
+const ribbonGrayMat = createRibbonGray();
+// Harmony 2 — dimmer companion of the active body's ribbon accent.
+// Flat (unlit) so a recessed face reads as a solid tone instead of
+// catching the body's gradient, and double-sided so it works both
+// when assigned as a mesh's direct material (the camera lens-box cap
+// visible through the glass) and as a BackSide inner-wall clone.
+// Color is retinted in setActiveMaterial whenever the body variant
+// changes.
+const harmony2Mat = new THREE.MeshBasicMaterial({
+  color: new THREE.Color('#000000'),
+  side: THREE.DoubleSide,
+  toneMapped: false,
+});
+harmony2Mat.userData.paletteId = 'harmony2';
+const glassMat     = createGlass();
+const chromeMat    = createChrome();
+// Lens-style glass — clearly readable on small camera-lens discs:
+// stronger clearcoat highlight + slightly higher opacity than the
+// purifier-cup glass, which is tuned for a large soft surface.
+const lensGlassMat = new THREE.MeshPhysicalMaterial({
+  color:               0xffffff,
+  roughness:           0.05,
+  metalness:           0.0,
+  transparent:         true,
+  opacity:             0.55,
+  clearcoat:           1.0,
+  clearcoatRoughness:  0.0,
+  envMapIntensity:     2.5,
+  side:                THREE.DoubleSide,
+  depthWrite:          false,
+});
+lensGlassMat.userData.paletteId = 'lensGlass';
+
+// Camera-lens material — a milky neutral-gray coated disc reading as
+// the frosted front element of a stylized lens rather than a dark
+// optical coating. High roughness softens the specular so it sits
+// alongside the frosted body instead of punching through it, while
+// the clearcoat keeps a subtle glossy envelope. `transparent` is on
+// (even at default opacity 1) so the admin opacity slider can fade
+// the disc without needing a material-flag toggle.
+const cameraLensMat = new THREE.MeshPhysicalMaterial({
+  color:               new THREE.Color(0.35, 0.35, 0.44),
+  metalness:           0.64,
+  roughness:           0.34,
+  clearcoat:           0.58,
+  clearcoatRoughness:  0.13,
+  envMapIntensity:     0.71,
+  transparent:         true,
+  opacity:             0.58,
+});
+cameraLensMat.userData.paletteId = 'cameraLens';
+
+// Track which body meshes receive the active material (so we can swap).
+let bodyMeshes = [];
+let activeVariantId = 'frostedBlue';
+let currentAssetId = 'box';
+
+// ── Designer-preset camera views ───────────────────────────
+// Direction vectors (scaled by the asset's framing distance) for
+// three quick camera presets designers can hand off to users.
+// Declared here so admin UI / landing preview code running earlier
+// in the module can reference it without a temporal-dead-zone error.
+const VIEW_DIRS = {
+  '1': [0.85, 0.70, 1.00],   // Isometric — default iso angle
+  '2': [0.85, 0.40, 1.00],   // Slight top-down — gentle overhead, front-heavy
+  '3': [0.60, 0.00, 1.00],   // Side-front — front-weighted with side depth
+};
+
+// ── Asset registry ────────────────────────────────────────
+// Per-asset rules: which meshes are luminance-white accents vs the
+// frosted body. Names from the gltf files are matched case-insensitive.
+// materialFor(name, parentName) returns one of:
+//   'body'      → active frosted variant (swappable via palette)
+//   'luminance' → flat white accents (no lighting)
+//   'glass'     → built-in frosted glass
+//   'chrome'    → built-in chrome metal
+const ASSETS = {
+  box: {
+    url: 'box.gltf',
+    label: 'Moving Box',
+    rootName: 'newbox_blue_moving',
+    recommended: 'frostedBlue',
+    gradientYShift: -0.12,
+    materialFor(name) {
+      return /ribbon/i.test(name) ? 'luminance' : 'body';
+    },
+  },
+  coupon: {
+    url: 'Coupon.gltf',
+    label: 'Coupon',
+    rootName: 'coupon',
+    recommended: 'frostedPink',
+    // Source body extent ~392×283×36. Old modelScale 6.3 inflated the
+    // body to ~2470×1786×227 world units — way bigger than the other
+    // assets (~300 cubic) and breaking transmission rendering on a
+    // shared material because absorption is path-length based. Use
+    // 1.5 so coupon's body lands near the same magnitude as its
+    // neighbors while frameScale keeps it filling the cell at the
+    // same on-screen size.
+    modelScale: 1.5,
+    frameScale: 1.6,
+    useFullGradientBox: true,
+    viewOverrides: { '3': [0.25, 0.05, 1.00] },
+    // Weld co-located vertices before normal calc so any UV/material
+    // splits in the source don't leave faceted normals on the body.
+    weldVertices: true,
+    materialFor(name, parentName) {
+      const n = (name || '').toLowerCase();
+      if (/percent/.test(n)) return 'luminance';
+      return 'body';
+    },
+  },
+  gift: {
+    url: 'gift.gltf',
+    label: 'Gift Box',
+    rootName: 'gift_save',
+    recommended: 'frostedRed',
+    rotationY: Math.PI / 2,
+    // Tighter framing than default so the box+ribbon reads at the same
+    // on-screen size as the 이사박스 asset (whose bbox has no tall accents).
+    frameScale: 1.8,
+    // Ribbons sit above the box, pulling the bbox center upward — when
+    // the root is centered, the box body ends up below the visual center.
+    // Shift up by 15% of asset height to land it where 이사박스 sits.
+    yOffset: 0.15,
+    materialFor(name, parentName) {
+      const n = (name || '').toLowerCase();
+      const pn = (parentName || '').toLowerCase();
+      // Ribbon parts are brand-fixed white (luminance).
+      if (/ribbon/.test(n) || /ribbon/.test(pn)) return 'ribbonGray';
+      return 'body';
+    },
+  },
+  purifier: {
+    url: 'waterpurifier.gltf',
+    label: 'Water Purifier',
+    rootName: 'water purifier',
+    recommended: 'frostedBlue',
+    rotationY: Math.PI,
+    materialFor(name, parentName) {
+      const n = (name || '').toLowerCase();
+      const pn = (parentName || '').toLowerCase();
+      if (/^logo$/.test(n) || /^logo$/.test(pn)) return 'luminance';
+      if (/cylinder/.test(n) || /cylinder/.test(pn)) return 'chrome';
+      if (/^cup$/.test(n) || /^cup$/.test(pn)) return 'glass';
+      return 'body';
+    },
+  },
+  basket: {
+    url: 'basket3.glb',
+    label: 'Basket',
+    // basket3.glb wraps the assembly in a `basket.1` parent group
+    // (sanitized by Three.js to `basket1`), with `basket`, `handle`,
+    // and `handle_mat` as siblings underneath. Use the parent so the
+    // full assembly is loaded — the inner `basket` group only holds
+    // the body mesh.
+    rootName: 'basket1',
+    recommended: 'frostedOrange',
+    keepOriginalNormals: true,
+    frameScale: 1.7,
+    viewOverrides: {
+      '1': [1.039, 0.774, 0.790],
+      '2': [1.299, 0.442, -0.002],
+      '3': [1.126, -0.001, 0.303],
+    },
+    materialFor(name, parentName) {
+      const norm = (s) => (s || '').toLowerCase().replace(/\s+/g, '_');
+      const n  = norm(name);
+      const pn = norm(parentName);
+      const matches = (key) => {
+        const k = norm(key);
+        return n === k || pn === k;
+      };
+      // The handle's accent strap sits on top of the woven body. It
+      // tracks the body variant's harmony color via the ribbonGray
+      // material — same pattern as the clock and basket bands.
+      if (matches('handle_mat')) return 'ribbonGray';
+      return 'body';
+    },
+    // Exclude the handle so the gradient spans only the basket body's
+    // height, keeping the color saturated instead of stretching across
+    // the full bbox up to the handle's top. Checks both name and
+    // parentName because gltfpack wraps each mesh in a Group, leaving
+    // the recognizable name on the parent.
+    inGradientBox(name, parentName) {
+      const norm = (s) => (s || '').toLowerCase().replace(/\s+/g, '_');
+      const n  = norm(name);
+      const pn = norm(parentName);
+      return n === 'basket' || pn === 'basket';
+    },
+    // No gradient shift — the new basket3 mesh balances saturation
+    // across the full body height on its own, so the default Vertical
+    // Gradient (top→bottom across the body bbox) is the right read.
+    gradientYShift: 0,
+  },
+  clock: {
+    url: 'clock.glb?v=2',
+    label: 'Clock',
+    rootName: 'clock',
+    recommended: 'frostedViolet',
+    keepOriginalNormals: true,
+    frameScale: 1.89,
+    materialFor(name) {
+      const n = (name || '').toLowerCase();
+      // Hands read as pure white signage — flat luminance keeps them
+      // crisp regardless of the active body color.
+      if (n === 'clock_arrow') return 'luminance';
+      // The white tape band around the body picks up the active
+      // variant's harmony hex (via ribbonGrayMat).
+      if (n === 'body-tape') return 'ribbonGray';
+      return 'body';
+    },
+  },
+  camera: {
+    url: 'camera6.glb',
+    label: 'Camera',
+    rootName: 'camera',
+    recommended: 'frostedDarkBlue',
+    // Tighter framing than the default 2.2 so the camera reads about
+    // 1.2× larger on screen (2.2 / 1.2 ≈ 1.83), matching the
+    // library's visual weight for this asset.
+    frameScale: 1.83,
+    // Drop the whole asset a touch so the body-box midpoint (rather
+    // than the bbox midpoint that includes the off-center shutter
+    // button) lands near the thumbnail's visual center — matches how
+    // the other assets sit in the library grid.
+    yOffset: -0.05,
+    // Small +Z nudge so the camera sits a hair "forward" in the iso
+    // thumbnail crop. The button and lens geometry weight the bbox
+    // toward one side in XZ; this pulls the visible mass back onto
+    // the thumbnail's center line.
+    zOffset: 0.05,
+    // Positive shift biases the gradient toward the lighter top color
+    // so the body reads brighter at mid-height where the lens sits,
+    // matching the designer-tuned value from the admin panel.
+    gradientYShift: 0.13,
+    // Weld co-located vertices on body meshes before normal calc so
+    // the camera body reads smooth across C4D's UV/material seams
+    // instead of showing faceted polygons.
+    weldVertices: true,
+    // Per-mesh position nudges in glTF source units (cm-scale).
+    //   button   — lift slightly so its base doesn't intersect the
+    //              body shell.
+    //   lens spot — push forward along +Z so the spot disc clears
+    //              the lens behind it. The C4D source already sits
+    //              the spot a hair forward, but not enough on its
+    //              own — without this code-side push the chrome
+    //              glass leaks through the white luminance surface
+    //              as flecks.
+    meshOffsets: {
+      button: [0, 0.08, 0],
+      'lens spot': [0, 0, 5],
+    },
+    // Smooth the lens cluster (lens-tape + lens-box + glass children)
+    // beyond what the body-merge pipeline reaches: lens-tape and glass
+    // skip the merge because they're assigned ribbonGray / cameraLens
+    // materials directly, so their source normals would otherwise
+    // carry through any C4D UV-split facets.
+    smoothMeshes: ['lens'],
+    materialFor(name, parentName) {
+      // Three.js's GLTFLoader runs every node name through
+      // PropertyBinding.sanitizeNodeName, which replaces whitespace
+      // with `_` (so glTF "lens spot" becomes "lens_spot" by the time
+      // it reaches us). Normalize the candidate keys the same way so
+      // configs can be authored with either form.
+      const norm = (s) => (s || '').toLowerCase().replace(/\s+/g, '_');
+      const n  = norm(name);
+      const pn = norm(parentName);
+      // gltfpack-optimized GLB wraps each mesh in a Group, leaving the
+      // recognizable name on `parentName` while the actual Mesh's name
+      // is blank. Both must be checked for every match below.
+      const matches = (key) => {
+        const k = norm(key);
+        return n === k || pn === k;
+      };
+      // Front lens disc — dedicated camera-lens material: dark near-
+      // black base + chrome-like reflection, mimicking the coated
+      // optical glass of a real photographic lens.
+      if (matches('glass')) return 'cameraLens';
+      // Recessed inner lens face — harmony-2 (the dimmer companion of
+      // the body's accent) so the recess reads as a deeper tonal
+      // sibling of the body color. `lens-mat` was the name in the
+      // older camera source; `Disc` plays the same role in camera6.
+      if (matches('lens-mat') || matches('disc')) return 'harmony2';
+      // Tape bands + the shutter button pick up the body variant's
+      // harmony accent color via the ribbonGray material — a tonal
+      // companion of the active body tone.
+      if (matches('body-tape') || matches('lens-tape') || matches('button')) {
+        return 'ribbonGray';
+      }
+      // Flat-white luminance accent — the front `lens spot` highlight
+      // disc reads as a crisp, color-independent mark on the lens.
+      if (matches('lens spot')) return 'luminance';
+      return 'body';
+    },
+  },
+  packagebox: {
+    url: 'packagebox.glb',
+    label: 'Package Box',
+    // Source file has the root node name spelled "pakagebox" (missing
+    // the second 'c'); preserve the typo here so the loader resolves.
+    rootName: 'pakagebox',
+    recommended: 'frostedPink',
+    // Weld co-located vertices on body meshes before normal calc so
+    // the box body reads smooth across C4D's UV/material seams instead
+    // of showing faceted polygons at the splits between the outer box
+    // and the recessed inner face.
+    weldVertices: true,
+    // Negative shift biases the gradient toward saturated by extending
+    // the bbox below the visible body, so the bottom never reaches the
+    // lightest end of the gradient — designer-tuned via the admin panel.
+    gradientYShift: -0.17,
+    // Lift the inner cavity's floor off the inner mesh and render it
+    // as harmony-2 (dimmer companion of the body accent), while the
+    // four inner walls keep flowing through 'body'. The split runs on
+    // the geometry's local y_min, so it adapts automatically to the
+    // box's depth without per-asset tuning.
+    bottomFaceSplit: [
+      { meshName: 'box-Blue_transper.4', kind: 'harmony2' },
+    ],
+    materialFor(name, parentName) {
+      const n  = (name || '').toLowerCase();
+      const pn = (parentName || '').toLowerCase();
+      // Percent badge on the front face — flat white luminance so the
+      // mark reads crisp regardless of the active body color. After
+      // gltfpack optimization the named "percent" node is a Group with
+      // an unnamed child Mesh, so we have to match either side.
+      if (n === 'percent' || pn === 'percent') return 'luminance';
+      // Everything else (outer box + inner walls left over after the
+      // bottom-face split) shares the active frosted body color.
+      return 'body';
+    },
+  },
+  lightning: {
+    url: 'lightning.glb',
+    label: 'Lightning',
+    // Source file ships the root node spelled `ligtning` (missing the
+    // second 'h'); match the actual name so the loader can resolve it.
+    rootName: 'ligtning',
+    recommended: 'frostedRed',
+    // Bring the bolt up to a comparable visual weight with the other
+    // library assets — the source mesh exports a hair small at default
+    // scale, so 1.3× pushes it into the same on-screen footprint.
+    modelScale: 1.3,
+    // Tighter framing than the default 2.2 to render the bolt about
+    // 1.4× larger on screen (2.2 / 1.4 ≈ 1.57). modelScale alone
+    // can't grow the on-screen footprint — the frustum auto-scales
+    // with maxDim — so the tightening has to live in frameScale.
+    frameScale: 1.57,
+    // Strong negative shift biases the gradient toward the saturated
+    // top color across most of the bolt — the bolt is tall and narrow,
+    // so without this it reads washed out toward the bottom tip.
+    gradientYShift: -0.6,
+    // Weld co-located vertices before normal recompute so the bolt's
+    // bevels read smooth across any C4D UV/material splits.
+    weldVertices: true,
+    materialFor() {
+      return 'body';
+    },
+  },
+};
+
+// ── Weld vertices by position only ─────────────────────────
+// `mergeVertices` from BufferGeometryUtils compares every attribute
+// when deciding which vertices to fuse, so C4D's smoothing-group /
+// UV / material splits (same position, different normal/uv) survive
+// the weld and leave a faceted surface. This helper drops everything
+// but position before welding, so co-located vertices fuse regardless
+// of those splits. The caller is expected to call
+// computeVertexNormals afterwards to regenerate smooth normals.
+function weldByPosition(geometry, tolerance) {
+  const stripped = new THREE.BufferGeometry();
+  stripped.setAttribute('position', geometry.attributes.position.clone());
+  if (geometry.index) stripped.setIndex(geometry.index.clone());
+  const welded = mergeVertices(stripped, tolerance);
+  geometry.dispose();
+  return welded;
+}
+
+// ── Lift off the bottom face of a geometry into its own piece ──────
+// Splits a mesh into "bottom" (faces whose vertices all sit at y_min)
+// and "walls" (everything else), so the caller can render the bottom
+// face with a different material (e.g. the recessed inner floor of an
+// open box reading darker than the surrounding walls). Returns null
+// if either subset is empty so the caller can fall back gracefully.
+function extractBottomFace(geometry, tolFraction = 0.02) {
+  const positions = geometry.attributes.position;
+  const normals   = geometry.attributes.normal;
+  const indexed   = !!geometry.index;
+  const faceCount = indexed ? geometry.index.count / 3 : positions.count / 3;
+
+  let yMin = Infinity, yMax = -Infinity;
+  for (let i = 0; i < positions.count; i++) {
+    const y = positions.getY(i);
+    if (y < yMin) yMin = y;
+    if (y > yMax) yMax = y;
+  }
+  const tol = Math.max(1e-4, (yMax - yMin) * tolFraction);
+
+  const bottomFaceIdx = [];
+  const wallFaceIdx   = [];
+  for (let f = 0; f < faceCount; f++) {
+    let allAtBottom = true;
+    for (let v = 0; v < 3 && allAtBottom; v++) {
+      const idx = indexed ? geometry.index.getX(f * 3 + v) : f * 3 + v;
+      if (positions.getY(idx) - yMin > tol) allAtBottom = false;
+    }
+    (allAtBottom ? bottomFaceIdx : wallFaceIdx).push(f);
+  }
+  if (bottomFaceIdx.length === 0 || wallFaceIdx.length === 0) return null;
+
+  function buildSubGeom(faceIdx) {
+    const pos = new Float32Array(faceIdx.length * 9);
+    const nrm = normals ? new Float32Array(faceIdx.length * 9) : null;
+    let p = 0, n = 0;
+    for (const f of faceIdx) {
+      for (let v = 0; v < 3; v++) {
+        const idx = indexed ? geometry.index.getX(f * 3 + v) : f * 3 + v;
+        pos[p++] = positions.getX(idx);
+        pos[p++] = positions.getY(idx);
+        pos[p++] = positions.getZ(idx);
+        if (normals) {
+          nrm[n++] = normals.getX(idx);
+          nrm[n++] = normals.getY(idx);
+          nrm[n++] = normals.getZ(idx);
+        }
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    if (nrm) g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+    return g;
+  }
+
+  return {
+    bottom: buildSubGeom(bottomFaceIdx),
+    walls:  buildSubGeom(wallFaceIdx),
+  };
+}
+
+// ── Smooth normals by angle — proper smooth-group algorithm ──
+// Computes the true geometric face normal for every triangle,
+// then for each vertex averages only the face normals from
+// co-located vertices whose faces are within `angleThreshold`
+// radians. Flat surfaces get perfectly consistent normals while
+// hard edges (e.g. box top ↔ side at 90°) are preserved.
+function smoothNormalsByAngle(geometry, tolerance = 0.5, angleThreshold = 1.5) {
+  const pos  = geometry.attributes.position;
+  const norm = geometry.attributes.normal;
+  const count = pos.count;
+  const faceCount = count / 3;
+  const cosThreshold = Math.cos(angleThreshold);
+  const inv = 1 / tolerance;
+
+  // Step 1: compute true geometric face normal per triangle
+  const faceNormals = new Array(faceCount);
+  const v0 = new THREE.Vector3(), v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+  const e1 = new THREE.Vector3(), e2 = new THREE.Vector3();
+  for (let f = 0; f < faceCount; f++) {
+    const i = f * 3;
+    v0.fromBufferAttribute(pos, i);
+    v1.fromBufferAttribute(pos, i + 1);
+    v2.fromBufferAttribute(pos, i + 2);
+    e1.subVectors(v1, v0);
+    e2.subVectors(v2, v0);
+    faceNormals[f] = new THREE.Vector3().crossVectors(e1, e2).normalize();
+  }
+
+  // Step 2: spatial hash — group vertices at the same position.
+  // Each vertex is inserted into its own cell. During lookup,
+  // we check all 27 neighboring cells (3×3×3) to avoid missing
+  // co-located vertices that land on a bucket boundary.
+  const buckets = new Map();
+  for (let i = 0; i < count; i++) {
+    const kx = Math.round(pos.getX(i) * inv);
+    const ky = Math.round(pos.getY(i) * inv);
+    const kz = Math.round(pos.getZ(i) * inv);
+    const key = `${kx},${ky},${kz}`;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(i);
+  }
+
+  // Step 3: for each vertex, gather co-located vertices from
+  // this cell + 26 neighbors, then average face normals within
+  // the angle threshold.
+  const tolSq = tolerance * tolerance;
+  for (const indices of buckets.values()) {
+    for (const i of indices) {
+      const px = pos.getX(i), py = pos.getY(i), pz = pos.getZ(i);
+      const myFN = faceNormals[Math.floor(i / 3)];
+      const cx = Math.round(px * inv), cy = Math.round(py * inv), cz = Math.round(pz * inv);
+      let nx = 0, ny = 0, nz = 0;
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dz = -1; dz <= 1; dz++) {
+            const neighbors = buckets.get(`${cx+dx},${cy+dy},${cz+dz}`);
+            if (!neighbors) continue;
+            for (const j of neighbors) {
+              const ddx = pos.getX(j) - px, ddy = pos.getY(j) - py, ddz = pos.getZ(j) - pz;
+              if (ddx*ddx + ddy*ddy + ddz*ddz > tolSq) continue;
+              const otherFN = faceNormals[Math.floor(j / 3)];
+              if (myFN.dot(otherFN) >= cosThreshold) {
+                nx += otherFN.x; ny += otherFN.y; nz += otherFN.z;
+              }
+            }
+          }
+        }
+      }
+      const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+      norm.setXYZ(i, nx / len, ny / len, nz / len);
+    }
+  }
+  norm.needsUpdate = true;
+}
+
+// ── Load model ─────────────────────────────────────────────
+const group = new THREE.Group();
+scene.add(group);
+let currentRoot = null;
+// Tracked so the designer-preset camera views can scale their
+// orbit distance to the currently loaded asset.
+let currentMaxDim = 1;
+
+const loader = new GLTFLoader();
+
+function loadAsset(assetId) {
+  const asset = ASSETS[assetId];
+  if (!asset) return Promise.reject(new Error('Unknown asset: ' + assetId));
+
+  group.position.set(0, 0, 0);
+  group.scale.setScalar(1);
+  currentAssetId = assetId;
+
+  return new Promise((resolve, reject) => {
+  loader.load(asset.url, (gltf) => {
+    // Clear previous asset
+    if (currentRoot) {
+      group.remove(currentRoot);
+      currentRoot.traverse((o) => { if (o.isMesh) o.geometry?.dispose(); });
+    }
+    bodyMeshes = [];
+
+    // Pick the requested subtree if the file contains multiple assets.
+    let root = gltf.scene;
+    if (asset.rootName) {
+      const match = root.getObjectByName(asset.rootName);
+      if (match) {
+        match.parent?.remove(match);
+        root = match;
+      }
+    }
+    currentRoot = root;
+    if (asset.modelScale) root.scale.setScalar(asset.modelScale);
+    if (asset.rotationY) root.rotation.y = asset.rotationY;
+    // Per-mesh position nudges (e.g. lift the camera button so its
+    // base doesn't sink into the body shell). Applied before bbox /
+    // material classification so downstream transforms still align.
+    // Looked up via getObjectByName so it resolves whichever node
+    // carries the recognizable name — usually the gltfpack-emitted
+    // Group rather than the unnamed Mesh inside.
+    if (asset.meshOffsets) {
+      for (const [name, off] of Object.entries(asset.meshOffsets)) {
+        // Three.js sanitizes node names by converting whitespace to
+        // `_`, so look up using the same form to keep author-friendly
+        // keys like 'lens spot' working alongside 'lens_spot'.
+        const sanitized = name.replace(/\s+/g, '_');
+        const target = root.getObjectByName(name) || root.getObjectByName(sanitized);
+        if (!target) continue;
+        target.position.x += off[0];
+        target.position.y += off[1];
+        target.position.z += off[2];
+      }
+    }
+    // Per-mesh visibility toggle. Hides named nodes outright (e.g. an
+    // accent piece designers want to keep authored in the source file
+    // but suppress in the live render). The hidden node still
+    // contributes to the asset's bbox, which is fine — most hide
+    // targets sit inside the existing bbox, so nothing visible shifts.
+    if (asset.hideMeshes) {
+      for (const name of asset.hideMeshes) {
+        const sanitized = name.replace(/\s+/g, '_');
+        const target = root.getObjectByName(name) || root.getObjectByName(sanitized);
+        if (target) target.visible = false;
+      }
+    }
+    // Per-mesh extra smoothing. Walks every Mesh under the named node
+    // and replaces its geometry with a position-welded clone +
+    // recomputed smooth normals. Useful for non-body parts (chrome,
+    // ribbonGray) that bypass the body merge's smoothing pipeline and
+    // would otherwise render with whatever normals the source authored
+    // — including any facet artifacts from C4D's UV/material splits.
+    if (asset.smoothMeshes) {
+      // Use the whole asset's bbox for the weld tolerance so the value
+      // matches what the body-merge pipeline uses — co-located vertices
+      // that the body weld would fuse get fused here too. Followed by a
+      // generous angle-threshold pass (2.5 rad ≈ 143°) so lens-curve
+      // creases that survive welding get averaged into a smooth surface.
+      const rootBox = new THREE.Box3().setFromObject(root);
+      const rSize = rootBox.getSize(new THREE.Vector3());
+      const rMax = Math.max(rSize.x, rSize.y, rSize.z) || 1;
+      const tol = Math.max(1e-4, rMax * 0.001);
+      for (const name of asset.smoothMeshes) {
+        const sanitized = name.replace(/\s+/g, '_');
+        const target = root.getObjectByName(name) || root.getObjectByName(sanitized);
+        if (!target) continue;
+        target.traverse((obj) => {
+          if (!obj.isMesh) return;
+          obj.geometry = weldByPosition(obj.geometry, tol);
+          obj.geometry.computeVertexNormals();
+          obj.geometry = obj.geometry.toNonIndexed();
+          smoothNormalsByAngle(obj.geometry, tol, 2.5);
+        });
+      }
+    }
+    // Inner-wall clones: for each named mesh, drop a back-face copy
+    // of its geometry with a flat color so the inside of an open
+    // shell (e.g. the camera lens cylinder seen through the front
+    // glass) reads as that color instead of empty/back-culled space.
+    // The clone is scaled slightly inward to avoid z-fighting.
+    if (asset.innerWalls) {
+      for (const [meshName, hex] of Object.entries(asset.innerWalls)) {
+        const target = root.getObjectByName(meshName);
+        if (!target || !target.isMesh) continue;
+        const innerMat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(hex),
+          side: THREE.BackSide,
+          toneMapped: false,
+        });
+        const inner = new THREE.Mesh(target.geometry.clone(), innerMat);
+        inner.position.copy(target.position);
+        inner.rotation.copy(target.rotation);
+        inner.scale.copy(target.scale).multiplyScalar(0.998);
+        target.parent.add(inner);
+      }
+    }
+    // Bottom-face split: lift off the named mesh's bottom face into a
+    // sibling mesh with a dedicated material, leaving the walls in the
+    // original mesh to flow through the standard material pipeline.
+    // Used by assets like packagebox where the inner cavity floor must
+    // read darker than the surrounding inner walls without authoring a
+    // separate mesh in the source file.
+    if (asset.bottomFaceSplit) {
+      const matMap = {
+        harmony2:   harmony2Mat,
+        ribbonGray: ribbonGrayMat,
+        luminance:  tapeMat,
+      };
+      for (const cfg of asset.bottomFaceSplit) {
+        const target = root.getObjectByName(cfg.meshName);
+        if (!target) continue;
+        // After gltfpack, the named node may be a Group wrapping the
+        // actual Mesh; resolve to whichever holds the geometry.
+        const targetMesh = target.isMesh
+          ? target
+          : target.children.find(c => c.isMesh);
+        if (!targetMesh) continue;
+        const split = extractBottomFace(targetMesh.geometry);
+        if (!split) continue;
+        const bottomMat = matMap[cfg.kind];
+        if (!bottomMat) continue;
+        const bottomMesh = new THREE.Mesh(split.bottom, bottomMat);
+        bottomMesh.name = '__split_bottom__';
+        // Marker so the material loop below leaves this mesh alone —
+        // it already has its target material assigned at construction.
+        bottomMesh.userData.skipMaterialAssign = true;
+        bottomMesh.castShadow = true;
+        bottomMesh.receiveShadow = true;
+        targetMesh.parent.add(bottomMesh);
+        targetMesh.geometry.dispose();
+        targetMesh.geometry = split.walls;
+      }
+    }
+    root.updateMatrixWorld(true);
+
+    // Pass 1: compute vertical bounds for the frosted gradient.
+    // Body-only for most assets; full bbox for assets where non-body
+    // parts extend beyond the body (e.g. coupon's percent symbol).
+    const bodyBox = new THREE.Box3();
+    const fullBox = new THREE.Box3();
+    root.traverse((obj) => {
+      if (!obj.isMesh) return;
+      if (obj.userData.skipMaterialAssign) return;
+      fullBox.expandByObject(obj);
+      const kind = asset.materialFor(obj.name, obj.parent?.name);
+      // inGradientBox lets an asset narrow the gradient range to a
+      // subset of its body meshes — useful when an outlying part
+      // (e.g. a handle) would otherwise stretch the gradient and wash
+      // out the dominant body. Default: every 'body' mesh contributes.
+      const inGrad = asset.inGradientBox
+        ? asset.inGradientBox(obj.name, obj.parent?.name)
+        : (kind === 'body');
+      if (inGrad) bodyBox.expandByObject(obj);
+    });
+    const useFullBox = bodyBox.isEmpty() || asset.useFullGradientBox;
+    const gradBox = useFullBox ? fullBox : bodyBox;
+    // gradientYShift biases the gradient toward darker (negative) or
+    // lighter (positive) by extending the gradient bbox on one side
+    // instead of sliding the whole window — this avoids a clamped
+    // flat band at the mesh edge and keeps the transition smooth
+    // across the full visible body height.
+    const span = gradBox.max.y - gradBox.min.y;
+    const shift = asset.gradientYShift || 0;
+    const yMin = shift < 0 ? gradBox.min.y + shift * span : gradBox.min.y;
+    const yMax = shift > 0 ? gradBox.max.y + shift * span : gradBox.max.y;
+
+    // Collect body meshes for merging. Original glTF normals are
+    // preserved (no computeVertexNormals) — they're authored smooth
+    // in C4D and give the best result on reflective materials.
+    // After merge, angle-aware weldNormals smooths seam boundaries
+    // while preserving intentional hard edges.
+    const bodyToMerge = [];
+    root.traverse((obj) => {
+      if (!obj.isMesh) return;
+      if (obj.userData.skipMaterialAssign) return;
+      const kind = asset.materialFor(obj.name, obj.parent?.name);
+      obj.castShadow = true;
+      obj.receiveShadow = true;
+      switch (kind) {
+        case 'luminance':  obj.material = tapeMat;        break;
+        case 'ribbonGray': obj.material = ribbonGrayMat;  break;
+        case 'harmony2':   obj.material = harmony2Mat;    break;
+        case 'glass':      obj.material = glassMat;       break;
+        case 'lensGlass':  obj.material = lensGlassMat;   break;
+        case 'cameraLens': obj.material = cameraLensMat;  break;
+        case 'chrome':     obj.material = chromeMat;      break;
+        case 'body':
+        default:
+          bodyToMerge.push(obj);
+      }
+    });
+
+    // When the source file has authored smooth normals worth keeping
+    // (e.g. C4D exports with hard-edge splits), opting out of normal
+    // recomputation prevents the smoothing pipeline from flattening
+    // intentional curvature into faceted shading.
+    const keepNormals = !!asset.keepOriginalNormals;
+
+    if (bodyToMerge.length === 1) {
+      // Single body mesh — use indexed computeVertexNormals (shared
+      // vertices guarantee perfectly smooth flat surfaces).
+      const obj = bodyToMerge[0];
+      if (asset.weldVertices) {
+        const fSize = fullBox.getSize(new THREE.Vector3());
+        const fMax = Math.max(fSize.x, fSize.y, fSize.z);
+        const tol = Math.max(1e-4, fMax * 0.001);
+        // Strip everything but position before welding so C4D's
+        // smoothing-group / UV / material splits (which keep matching
+        // positions but break normals/uvs) collapse into single shared
+        // indices. computeVertexNormals after creates fresh smooth
+        // normals across what's now a fully merged surface.
+        obj.geometry = weldByPosition(obj.geometry, tol);
+      }
+      if (!keepNormals) obj.geometry.computeVertexNormals();
+      obj.material = materials[activeVariantId];
+      remapUVsToWorldY(obj, yMin, yMax);
+      bodyMeshes.push(obj);
+    } else if (bodyToMerge.length > 1) {
+      // Step 1: computeVertexNormals on each indexed mesh (smooth
+      // within each piece via shared-vertex averaging).
+      // Step 2: bake transforms, merge, convert to non-indexed.
+      // Step 3: smoothNormalsByAngle to fix seam normals across
+      // formerly separate meshes.
+      // Optional pre-step: weld co-located vertices in each piece so
+      // that C4D-authored UV/material splits don't leave faceted seams
+      // when computeVertexNormals averages within shared indices.
+      if (asset.weldVertices) {
+        const fSize = fullBox.getSize(new THREE.Vector3());
+        const fMax = Math.max(fSize.x, fSize.y, fSize.z);
+        const tol = Math.max(1e-4, fMax * 0.001);
+        for (const m of bodyToMerge) {
+          m.geometry = weldByPosition(m.geometry, tol);
+        }
+      }
+      if (!keepNormals) {
+        for (const m of bodyToMerge) m.geometry.computeVertexNormals();
+      }
+      // The merged mesh is re-parented to `root`, whose own matrix will
+      // be applied again at render time. Bake vertices into root-LOCAL
+      // space (not world) so non-body meshes (still in their original
+      // scene-graph slots) and the merged body end up aligned instead
+      // of double-transformed by the root node.
+      const rootInv = new THREE.Matrix4().copy(root.matrixWorld).invert();
+      const bakedGeos = bodyToMerge.map((m) => {
+        const g = m.geometry.clone();
+        // Standardize attributes BEFORE applyMatrix4 so the transform
+        // doesn't clamp values back into a narrow integer range:
+        //  • InterleavedBufferAttribute → mergeGeometries can't merge it
+        //    (C4D glTF exports often interleave attributes).
+        //  • Normalized integer storage (KHR_mesh_quantization) →
+        //    applyMatrix4 would re-quantize transformed positions and
+        //    collapse them into the original [-1,1] range.
+        for (const name of Object.keys(g.attributes)) {
+          if (name !== 'position' && name !== 'normal') {
+            g.deleteAttribute(name);
+            continue;
+          }
+          const a = g.attributes[name];
+          const needsCopy = a.isInterleavedBufferAttribute
+            || a.normalized
+            || !(a.array instanceof Float32Array);
+          if (!needsCopy) continue;
+          const arr = new Float32Array(a.itemSize * a.count);
+          const getters = ['getX', 'getY', 'getZ', 'getW'];
+          for (let i = 0; i < a.count; i++) {
+            for (let j = 0; j < a.itemSize; j++) {
+              arr[i * a.itemSize + j] = a[getters[j]](i);
+            }
+          }
+          g.setAttribute(name, new THREE.BufferAttribute(arr, a.itemSize, false));
+        }
+        const meshToRoot = new THREE.Matrix4().multiplyMatrices(rootInv, m.matrixWorld);
+        g.applyMatrix4(meshToRoot);
+        return g;
+      });
+      for (const m of bodyToMerge) {
+        m.geometry.dispose();
+        m.parent?.remove(m);
+      }
+      let merged = mergeGeometries(bakedGeos, false);
+      for (const g of bakedGeos) g.dispose();
+      if (merged.index) {
+        const ni = merged.toNonIndexed();
+        merged.dispose();
+        merged = ni;
+      }
+      if (asset.weldVertices) {
+        // Treat the merged body as one continuous smooth surface — weld
+        // co-located vertices across the former mesh boundaries, then
+        // recompute vertex normals via shared-index averaging. Strip
+        // attributes other than position before weld so split normals
+        // from the per-mesh pre-weld step don't keep verts apart at
+        // the boundary.
+        const fSize = fullBox.getSize(new THREE.Vector3());
+        const fMax = Math.max(fSize.x, fSize.y, fSize.z);
+        const tol = Math.max(1e-4, fMax * 0.001);
+        merged = weldByPosition(merged, tol);
+        merged.computeVertexNormals();
+      } else if (!keepNormals) {
+        smoothNormalsByAngle(merged);
+      }
+      const mergedMesh = new THREE.Mesh(merged, materials[activeVariantId]);
+      mergedMesh.castShadow = true;
+      mergedMesh.receiveShadow = true;
+      remapUVsToWorldY(mergedMesh, yMin, yMax);
+      root.add(mergedMesh);
+      bodyMeshes.push(mergedMesh);
+    }
+
+    const bbox = new THREE.Box3().setFromObject(root);
+    const size = bbox.getSize(new THREE.Vector3());
+    const center = bbox.getCenter(new THREE.Vector3());
+    root.position.sub(center);
+    if (asset.yOffset) root.position.y += size.y * asset.yOffset;
+    if (asset.zOffset) root.position.z += size.z * asset.zOffset;
+    group.add(root);
+
+    // Frame camera for this asset. Use the asset's View 1 override if
+    // defined so a custom framing shows immediately on asset switch
+    // rather than snapping to the generic iso first.
+    const maxDim = Math.max(size.x, size.y, size.z);
+    currentMaxDim = maxDim;
+    const dist = maxDim * 2.0;
+    const v1 = asset.viewOverrides?.['1'] || [0.85, 0.70, 1.00];
+    camera.position.set(v1[0] * dist, v1[1] * dist, v1[2] * dist);
+    // Reset the view selector to the isometric preset on every new load.
+    document.querySelectorAll('#viewSelector .view-btn')
+      .forEach(b => b.classList.toggle('active', b.dataset.view === '1'));
+    frustumSize = maxDim * (asset.frameScale ?? 2.2);
+    const a = window.innerWidth / window.innerHeight;
+    camera.left   = -frustumSize * a / 2;
+    camera.right  =  frustumSize * a / 2;
+    camera.top    =  frustumSize / 2;
+    camera.bottom = -frustumSize / 2;
+    camera.near   = -maxDim * 10;
+    camera.far    =  maxDim * 10;
+    camera.zoom = 1;
+    camera.updateProjectionMatrix();
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    // After centering + yOffset, the object's bbox center sits at
+    // world Y = size.y * yOffset, so its bottom is that minus half
+    // the height. Place the ground plane exactly at that bottom so
+    // the shadow starts right at the object's base.
+    const objectCenterY = size.y * (asset.yOffset || 0);
+    // Default flush with the bbox bottom — most assets have flat bases,
+    // so any lift shows up as a visible gap between the asset and its
+    // shadow. Assets with a rounded/beveled bottom (e.g. clock) opt in
+    // to a small lift via `bevelComp` to close the white gap that would
+    // otherwise appear under their visible bottom edge.
+    const bevelComp = size.y * (asset.bevelComp ?? 0);
+    shadow.position.y = objectCenterY - size.y / 2 + bevelComp;
+    // Scale the ground plane to the asset so the shadow footprint
+    // always lands on it — glTF scales vary wildly between assets
+    // (meters vs centimeters), so a fixed 50×50 plane leaves large
+    // assets casting shadows into empty space.
+    shadow.scale.setScalar(maxDim);
+
+    // Retarget the shadow light at the object center and scale the
+    // orthographic shadow camera so any asset's silhouette fits.
+    shadowLight.position.copy(SHADOW_LIGHT_DIR).multiplyScalar(maxDim * 5);
+    shadowLight.position.y += objectCenterY;
+    shadowLight.target.position.set(0, objectCenterY, 0);
+    shadowLight.target.updateMatrixWorld();
+    const shadowExtent = maxDim * 3;
+    shadowLight.shadow.camera.left   = -shadowExtent;
+    shadowLight.shadow.camera.right  =  shadowExtent;
+    shadowLight.shadow.camera.top    =  shadowExtent;
+    shadowLight.shadow.camera.bottom = -shadowExtent;
+    shadowLight.shadow.camera.near   = 0.1;
+    shadowLight.shadow.camera.far    = maxDim * 20;
+    shadowLight.shadow.camera.updateProjectionMatrix();
+
+    // Update the radial-fade uniforms so the shadow is fully opaque
+    // near the object's ground footprint and smoothly fades to zero as
+    // the shadow extends outward.
+    shadowFadeUniforms.uObjectCenter.value.set(0, shadow.position.y, 0);
+    shadowFadeUniforms.uFadeInner.value = maxDim * 0.7;
+    shadowFadeUniforms.uFadeOuter.value = maxDim * 1.5;
+    // Size the contact-AO ellipse to the asset's XZ footprint so the
+    // penumbra-fill blob hugs the silhouette automatically per asset.
+    shadowFadeUniforms.uContactSize.value.set(size.x * 0.5, size.z * 0.5);
+
+    // Frosted (basic) mode: each asset loads in its recommended color.
+    // Black Friday mode: keep the BF material across asset switches.
+    const isBlackFriday = activeVariantId === 'blackFriday';
+    if (!isBlackFriday && asset.recommended && materials[asset.recommended]) {
+      setActiveMaterial(asset.recommended);
+    } else {
+      setActiveMaterial(activeVariantId);
+    }
+
+    // Always update the Recommended tag to reflect each asset's designer pick.
+    document.querySelectorAll('.chip .rec-tag').forEach(el => el.remove());
+    if (asset.recommended) {
+      const recChip = document.querySelector(`.chip[data-mat="${asset.recommended}"]`);
+      if (recChip) {
+        const tag = document.createElement('span');
+        tag.className = 'rec-tag';
+        tag.textContent = 'Recommended';
+        const gear = recChip.querySelector('.gear');
+        if (gear) recChip.insertBefore(tag, gear);
+        else recChip.appendChild(tag);
+      }
+    }
+    resolve();
+  }, undefined, (err) => {
+    console.error('GLTF load error', err);
+    const d = document.createElement('div');
+    d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#300;color:#fbb;padding:16px 20px;border-radius:8px;font-family:monospace;';
+    d.textContent = `${asset.url} 로드 실패 — 로컬 서버를 통해 열어주세요.`;
+    document.body.appendChild(d);
+    reject(err);
+  });
+  });
+}
+
+// ── Landing page: thumbnail grid ───────────────────────────
+// Sequentially load each asset in its recommended color + View 1
+// framing, capture the canvas to a data URL, and assemble a click-
+// able card grid. Clicking a card hides the landing overlay and
+// shows the main customizer with the selected asset loaded.
+async function buildLanding() {
+  const landing = document.getElementById('landing');
+  const loading = landing.querySelector('.loading');
+  const grid = landing.querySelector('.grid');
+  const thumbs = {};
+  const assetIds = Object.keys(ASSETS);
+
+  // Step 1: Try pre-baked PNGs in /librarythumbnail/ first. Static files
+  // load in parallel and skip the per-asset GLB + render entirely, so
+  // the grid appears almost instantly when thumbnails exist.
+  await Promise.all(assetIds.map(id => new Promise((resolve) => {
+    const img = new Image();
+    img.onload  = () => { thumbs[id] = `librarythumbnail/${id}.png`; resolve(); };
+    img.onerror = () => resolve();
+    img.src = `librarythumbnail/${id}.png`;
+  })));
+
+  // Step 2: For any asset still missing a thumbnail, live-render one as
+  // a fallback — keeps the library usable while designers are staging
+  // new thumbnails into the folder.
+  for (const id of assetIds) {
+    if (thumbs[id]) continue;
+    await loadAsset(id);
+    const asset = ASSETS[id];
+    const v = asset.viewOverrides?.['1'] || VIEW_DIRS['1'];
+    const d = currentMaxDim * 2.0;
+    camera.position.set(v[0] * d, v[1] * d, v[2] * d);
+    // Asset reads at ~80% of the frame so the form stays prominent
+    // in the thumbnail while leaving a small margin around it.
+    camera.zoom = 0.8;
+    camera.updateProjectionMatrix();
+    controls.target.set(0, 0, 0);
+    controls.update();
+    // Shadow off during thumbnail capture — clean silhouette on white.
+    shadow.visible = false;
+    shadowLight.castShadow = false;
+    await new Promise((r) => requestAnimationFrame(r));
+    renderer.render(scene, camera);
+    const srcCanvas = renderer.domElement;
+    const sz = Math.min(srcCanvas.width, srcCanvas.height);
+    const sx = (srcCanvas.width - sz) / 2;
+    const sy = (srcCanvas.height - sz) / 2;
+    const crop = document.createElement('canvas');
+    crop.width = crop.height = 500;
+    const ctx = crop.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 500, 500);
+    ctx.drawImage(srcCanvas, sx, sy, sz, sz, 0, 0, 500, 500);
+    thumbs[id] = crop.toDataURL('image/png');
+  }
+  grid.innerHTML = '';
+  for (const [id, asset] of Object.entries(ASSETS)) {
+    const card = document.createElement('button');
+    card.className = 'asset-card';
+    card.dataset.asset = id;
+    card.innerHTML = `
+      <div class="thumb"><img src="${thumbs[id]}" alt="${asset.label}" /></div>
+      <div class="label">${asset.label}</div>
+    `;
+    card.addEventListener('click', () => selectAsset(id));
+    grid.appendChild(card);
+  }
+  loading.hidden = true;
+  landing.querySelector('.search').hidden = false;
+  grid.hidden = false;
+
+  // Live search filter — case-insensitive substring match on label.
+  // The empty-state message replaces the grid when no card matches.
+  const searchInput = document.getElementById('searchInput');
+  const searchClear = document.getElementById('searchClear');
+  const emptyMsg = landing.querySelector('.empty');
+  function applyFilter() {
+    const q = searchInput.value.trim().toLowerCase();
+    searchClear.hidden = q.length === 0;
+    let visible = 0;
+    grid.querySelectorAll('.asset-card').forEach(card => {
+      const label = (card.querySelector('.label')?.textContent || '').toLowerCase();
+      const match = !q || label.includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    emptyMsg.hidden = visible > 0;
+  }
+  searchInput.addEventListener('input', applyFilter);
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    applyFilter();
+    searchInput.focus();
+  });
+}
+
+// Hide the landing, sync the right-side asset chip state, load the
+// chosen asset into the customizer.
+function selectAsset(id) {
+  document.getElementById('landing').classList.add('hidden');
+  document.querySelectorAll('.asset-chip').forEach(b => {
+    if (b.id !== 'exportPng' && b.id !== 'backToLibrary') {
+      b.classList.toggle('active', b.dataset.asset === id);
+    }
+  });
+  loadAsset(id);
+  refreshAssetSettings();
+  showDragHint();
+}
+
+// ── Drag-hint tutorial overlay ──────────────────────────────
+// Faint gray prompt that floats above the asset when the user first
+// enters the customizer. Dismissed on any pointer movement so it never
+// gets in the way of actual interaction.
+const dragHintEl = document.getElementById('dragHint');
+let dragHintDismissHandler = null;
+function showDragHint() {
+  if (!dragHintEl) return;
+  dragHintEl.classList.add('visible');
+  if (dragHintDismissHandler) return;
+  // Defer listener binding so the click that opened the asset (and any
+  // micro-movement during it) doesn't dismiss the hint immediately.
+  setTimeout(() => {
+    dragHintDismissHandler = (e) => {
+      // Only dismiss on actual click-drag: pointermove with a button held down.
+      if (e.buttons === 0) return;
+      dragHintEl.classList.remove('visible');
+      window.removeEventListener('pointermove', dragHintDismissHandler);
+      dragHintDismissHandler = null;
+    };
+    window.addEventListener('pointermove', dragHintDismissHandler, { passive: true });
+  }, 150);
+}
+
+// Re-open the landing overlay so the user can switch back to the
+// asset grid from within the customizer.
+document.getElementById('backToLibrary').addEventListener('click', () => {
+  document.getElementById('landing').classList.remove('hidden');
+});
+
+// ── Ground shadow ──────────────────────────────────────────
+// Dedicated shadow-caster light: intensity 0 so it contributes no
+// illumination to the assets (their lighting stays untouched), but it
+// still renders a shadow map that the ShadowMaterial plane below
+// reads to produce a tinted, object-silhouette drop shadow.
+const shadowLight = new THREE.DirectionalLight(0xffffff, 0);
+shadowLight.castShadow = true;
+// Lower-angled light → longer drop shadow. Ratio of horizontal to
+// vertical components controls the stretch: the larger the horizontal,
+// the longer the shadow extends from the object's base. Rotated 20°
+// around the Y-axis (toward the asset's front, +Z) so the shadow lays
+// out more behind the asset instead of square to its side.
+const SHADOW_LIGHT_DIR = new THREE.Vector3(-2.5, 5, 2)
+  .applyAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(20))
+  .normalize();
+shadowLight.position.copy(SHADOW_LIGHT_DIR).multiplyScalar(10);
+shadowLight.shadow.mapSize.set(2048, 2048);
+shadowLight.shadow.radius = 10;
+shadowLight.shadow.blurSamples = 25;
+shadowLight.shadow.bias = -0.0005;
+scene.add(shadowLight);
+scene.add(shadowLight.target);
+
+// Ground plane — only visible where a shadow is cast. The color tracks
+// the active body variant's bottom-gradient color so the drop shadow
+// picks up the dominant body tint. Opacity 0.5 gives the "near object"
+// intensity; PCF softness + blurSamples spread it out into a natural
+// fade toward the edge.
+const shadowMat = new THREE.ShadowMaterial({
+  color: new THREE.Color(FROSTED_VARIANTS.frostedBlue.bottom),
+  transparent: true,
+  opacity: 0.15,
+});
+// Shared uniform refs so we can update fade params per-asset after
+// the shader has been compiled lazily on first use.
+//
+// The shadow alpha is a composite of two layers:
+//   1) the directional drop shadow (PCF-blurred, long, soft) — gives
+//      the visible cast shadow that signals light direction.
+//   2) a contact AO blob centered under the asset — fills the PCF
+//      penumbra band that would otherwise leak as a thin white halo
+//      right at the contact line. Its extents track the asset's XZ
+//      footprint so the fix is automatic per asset.
+const shadowFadeUniforms = {
+  uObjectCenter:    { value: new THREE.Vector3() },
+  uFadeInner:       { value: 1 },
+  uFadeOuter:       { value: 2 },
+  uContactSize:     { value: new THREE.Vector2(1, 1) },
+  uContactInner:    { value: 1.0 },   // solid floor up to the silhouette
+  uContactOuter:    { value: 1.2 },   // faded out by 1.2× footprint
+  uContactStrength: { value: 0.85 },  // < 1.0 keeps deep umbra naturally darker
+};
+shadowMat.onBeforeCompile = (shader) => {
+  Object.assign(shader.uniforms, shadowFadeUniforms);
+  shader.vertexShader = shader.vertexShader
+    .replace('void main() {', 'varying vec3 vShadowWorldPos;\nvoid main() {')
+    .replace(
+      '#include <project_vertex>',
+      '#include <project_vertex>\nvShadowWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;'
+    );
+  shader.fragmentShader = shader.fragmentShader
+    .replace(
+      'uniform float opacity;',
+      `uniform float opacity;
+       uniform vec3 uObjectCenter;
+       uniform float uFadeInner;
+       uniform float uFadeOuter;
+       uniform vec2  uContactSize;
+       uniform float uContactInner;
+       uniform float uContactOuter;
+       uniform float uContactStrength;
+       varying vec3 vShadowWorldPos;`
+    )
+    .replace(
+      'gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) );',
+      `vec2  d         = vShadowWorldPos.xz - uObjectCenter.xz;
+       float shadowDist = length(d);
+       float radialFade = 1.0 - smoothstep(uFadeInner, uFadeOuter, shadowDist);
+       float dropShadow = (1.0 - getShadowMask()) * radialFade;
+       // Contact AO: elliptical blob normalized to the asset's XZ
+       // half-extents. Solid up to uContactInner, fading out to zero
+       // at uContactOuter. Combined via max() so the natural deep
+       // umbra (≥ strength) stays untouched while the penumbra band
+       // gets lifted to a uniform contact darkness.
+       float contactDist = length(d / uContactSize);
+       float contact     = (1.0 - smoothstep(uContactInner, uContactOuter, contactDist))
+                           * uContactStrength;
+       gl_FragColor = vec4( color, opacity * max(dropShadow, contact) );`
+    );
+};
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), shadowMat);
+shadow.rotation.x = -Math.PI / 2;
+shadow.receiveShadow = true;
+// Default to shadow-off; user can toggle on via the bottom UI.
+shadow.visible = false;
+shadowLight.castShadow = false;
+scene.add(shadow);
+
+// ── Lights ─────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const key = new THREE.DirectionalLight(0xffffff, 1.8);
+key.position.set(3, 5, 4); scene.add(key);
+const fill = new THREE.DirectionalLight(0xdceaff, 0.75);
+fill.position.set(-4, 2, -3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.4);
+rim.position.set(0, 3, -5); scene.add(rim);
+
+// ── Palette UI ─────────────────────────────────────────────
+const chips = document.querySelectorAll('.chip');
+const settingsPanel = document.getElementById('settings');
+const settingsTitle = document.getElementById('settingsTitle');
+const controlsEl    = document.getElementById('controls');
+
+
+// Dynamic control schemas, one per material type. Each entry maps a
+// slider to a property on the material (or a custom apply fn).
+const CONTROL_SCHEMAS = {
+  frosted: [
+    { key: 'top',                 label: 'Gradient Top',      type: 'color', custom: true },
+    { key: 'bottom',              label: 'Gradient Bottom',   type: 'color', custom: true },
+    { key: 'transmission',        label: 'Transmission',    min: 0, max: 1,     step: 0.01 },
+    { key: 'roughness',           label: 'Roughness',       min: 0, max: 1,     step: 0.01 },
+    { key: 'thickness',           label: 'Thickness',       min: 0, max: 4,     step: 0.01 },
+    { key: 'ior',                 label: 'IOR',             min: 1, max: 2.333, step: 0.01 },
+    { key: 'clearcoat',           label: 'Clearcoat',       min: 0, max: 1,     step: 0.01 },
+    { key: 'clearcoatRoughness',  label: 'Coat Roughness',  min: 0, max: 1,     step: 0.01 },
+    { key: 'attenuationDistance', label: 'Attenuation',     min: 0.2, max: 8,   step: 0.01 },
+    { key: 'gradientStrength',    label: 'Gradient Strength', min: 0, max: 1,   step: 0.01, custom: true },
+  ],
+  glass: [
+    { key: 'opacity',            label: 'Opacity',        min: 0, max: 1, step: 0.01 },
+    { key: 'roughness',          label: 'Roughness',      min: 0, max: 1, step: 0.01 },
+    { key: 'clearcoat',          label: 'Clearcoat',      min: 0, max: 1, step: 0.01 },
+    { key: 'clearcoatRoughness', label: 'Coat Roughness', min: 0, max: 1, step: 0.01 },
+    { key: 'envMapIntensity',    label: 'Env Intensity',  min: 0, max: 3, step: 0.01 },
+  ],
+  chrome: [
+    { key: 'roughness',           label: 'Roughness',       min: 0, max: 1,     step: 0.01 },
+    { key: 'metalness',           label: 'Metalness',       min: 0, max: 1,     step: 0.01 },
+    { key: 'envMapIntensity',     label: 'Env Intensity',   min: 0, max: 5,     step: 0.01 },
+    { key: 'emissiveIntensity',   label: 'Emissive',        min: 0, max: 1,     step: 0.01 },
+  ],
+  cameraLens: [
+    { key: 'colorR',              label: 'Color Red',       min: 0, max: 1,     step: 0.01, custom: true },
+    { key: 'colorG',              label: 'Color Green',     min: 0, max: 1,     step: 0.01, custom: true },
+    { key: 'colorB',              label: 'Color Blue',      min: 0, max: 1,     step: 0.01, custom: true },
+    { key: 'metalness',           label: 'Metalness',       min: 0, max: 1,     step: 0.01 },
+    { key: 'roughness',           label: 'Roughness',       min: 0, max: 1,     step: 0.01 },
+    { key: 'clearcoat',           label: 'Clearcoat',       min: 0, max: 1,     step: 0.01 },
+    { key: 'clearcoatRoughness',  label: 'Coat Roughness',  min: 0, max: 1,     step: 0.01 },
+    { key: 'envMapIntensity',     label: 'Env Intensity',   min: 0, max: 5,     step: 0.01 },
+    { key: 'opacity',             label: 'Opacity',         min: 0, max: 1,     step: 0.01 },
+  ],
+  lensGlass: [
+    { key: 'opacity',             label: 'Opacity',         min: 0, max: 1, step: 0.01 },
+    { key: 'roughness',           label: 'Roughness',       min: 0, max: 1, step: 0.01 },
+    { key: 'clearcoat',           label: 'Clearcoat',       min: 0, max: 1, step: 0.01 },
+    { key: 'clearcoatRoughness',  label: 'Coat Roughness',  min: 0, max: 1, step: 0.01 },
+    { key: 'envMapIntensity',     label: 'Env Intensity',   min: 0, max: 5, step: 0.01 },
+  ],
+  blackFriday: [
+    { key: 'roughness',           label: 'Roughness',       min: 0, max: 1,     step: 0.01 },
+    { key: 'metalness',           label: 'Metalness',       min: 0, max: 1,     step: 0.01 },
+    { key: 'clearcoat',           label: 'Clearcoat',       min: 0, max: 1,     step: 0.01 },
+    { key: 'clearcoatRoughness',  label: 'Coat Roughness',  min: 0, max: 1,     step: 0.01 },
+    { key: 'envMapIntensity',     label: 'Env Intensity',   min: 0, max: 5,     step: 0.01 },
+    { key: 'emissiveIntensity',   label: 'Emissive',        min: 0, max: 1,     step: 0.01 },
+    { key: 'reflectivity',        label: 'Reflectivity',    min: 0, max: 1,     step: 0.01 },
+    { key: 'sheen',               label: 'Sheen',           min: 0, max: 1,     step: 0.01 },
+    { key: 'sheenRoughness',      label: 'Sheen Roughness', min: 0, max: 1,     step: 0.01 },
+    { key: 'colorR',              label: 'Color Red',       min: 0, max: 1,     step: 0.01, custom: true },
+    { key: 'colorG',              label: 'Color Green',     min: 0, max: 1,     step: 0.01, custom: true },
+    { key: 'colorB',              label: 'Color Blue',      min: 0, max: 1,     step: 0.01, custom: true },
+  ],
+};
+
+// Registry of all editable materials (including frosted variants + built-ins)
+const editableMaterials = {
+  frostedBlue:     materials.frostedBlue,
+  frostedGreen:    materials.frostedGreen,
+  frostedOrange:   materials.frostedOrange,
+  frostedRed:      materials.frostedRed,
+  frostedViolet:   materials.frostedViolet,
+  frostedDarkBlue: materials.frostedDarkBlue,
+  frostedPink:     materials.frostedPink,
+  blackFriday:     materials.blackFriday,
+  glass:           glassMat,
+  chrome:          chromeMat,
+  lensGlass:       lensGlassMat,
+  cameraLens:      cameraLensMat,
+};
+
+// Snapshot helper for cameraLens (color stored as RGB components so
+// the slider UI can scrub each channel independently, mirroring the
+// blackFriday admin panel pattern).
+function snapshotCameraLens(mat) {
+  const out = {};
+  for (const c of CONTROL_SCHEMAS.cameraLens) {
+    if (c.key === 'colorR')      out.colorR = mat.color.r;
+    else if (c.key === 'colorG') out.colorG = mat.color.g;
+    else if (c.key === 'colorB') out.colorB = mat.color.b;
+    else out[c.key] = mat[c.key];
+  }
+  return out;
+}
+
+// Per-key state snapshots (so frosted variant switches preserve tuning,
+// and Reset can restore built-ins to their factory values)
+// Snapshot helper for Black Friday: pull standard props + decomposed color
+function snapshotBlackFriday(mat) {
+  const s = {};
+  for (const c of CONTROL_SCHEMAS.blackFriday) {
+    if (c.key === 'colorR')      s.colorR = mat.color.r;
+    else if (c.key === 'colorG') s.colorG = mat.color.g;
+    else if (c.key === 'colorB') s.colorB = mat.color.b;
+    else s[c.key] = mat[c.key];
+  }
+  return s;
+}
+
+// Snapshot the initial gradient color pair for every frosted variant so
+// the admin Reset can restore them — these live on FROSTED_VARIANTS,
+// which we mutate when the user picks a new color.
+function frostedInitial(id) {
+  const v = FROSTED_VARIANTS[id];
+  return {
+    ...FROSTED_PRESET,
+    ...(v.preset || {}),
+    top: v.top,
+    bottom: v.bottom,
+  };
+}
+
+const INITIAL_STATE = {
+  frostedBlue:     frostedInitial('frostedBlue'),
+  frostedGreen:    frostedInitial('frostedGreen'),
+  frostedOrange:   frostedInitial('frostedOrange'),
+  frostedRed:      frostedInitial('frostedRed'),
+  frostedViolet:   frostedInitial('frostedViolet'),
+  frostedDarkBlue: frostedInitial('frostedDarkBlue'),
+  frostedPink:     frostedInitial('frostedPink'),
+  blackFriday:     snapshotBlackFriday(materials.blackFriday),
+  glass:           snapshotMaterial(glassMat,  CONTROL_SCHEMAS.glass),
+  chrome:          snapshotMaterial(chromeMat, CONTROL_SCHEMAS.chrome),
+  lensGlass:       snapshotMaterial(lensGlassMat, CONTROL_SCHEMAS.lensGlass),
+  cameraLens:      snapshotCameraLens(cameraLensMat),
+};
+const state = {
+  frostedBlue:     { ...INITIAL_STATE.frostedBlue },
+  frostedGreen:    { ...INITIAL_STATE.frostedGreen },
+  frostedOrange:   { ...INITIAL_STATE.frostedOrange },
+  frostedRed:      { ...INITIAL_STATE.frostedRed },
+  frostedViolet:   { ...INITIAL_STATE.frostedViolet },
+  frostedDarkBlue: { ...INITIAL_STATE.frostedDarkBlue },
+  frostedPink:     { ...INITIAL_STATE.frostedPink },
+  blackFriday:     { ...INITIAL_STATE.blackFriday },
+  glass:           { ...INITIAL_STATE.glass },
+  chrome:          { ...INITIAL_STATE.chrome },
+  lensGlass:       { ...INITIAL_STATE.lensGlass },
+  cameraLens:      { ...INITIAL_STATE.cameraLens },
+};
+
+function snapshotMaterial(mat, schema) {
+  const out = {};
+  for (const c of schema) out[c.key] = mat[c.key];
+  return out;
+}
+
+function setActiveMaterial(id) {
+  activeVariantId = id;
+  const mat = materials[id];
+  for (const mesh of bodyMeshes) mesh.material = mat;
+  chips.forEach(c => c.classList.toggle('active', c.dataset.mat === id));
+
+  // Update category & BF button highlights.
+  const bfBtn = document.getElementById('bfButton');
+  if (id === 'blackFriday') {
+    bfBtn.classList.add('active');
+    document.querySelectorAll('.palette-category-header').forEach(h => h.classList.remove('active-category'));
+    document.querySelector('.palette-category[data-category="basic"]')?.classList.add('collapsed');
+  } else {
+    bfBtn.classList.remove('active');
+    const basicCat = document.querySelector('.palette-category[data-category="basic"]');
+    if (basicCat) {
+      basicCat.classList.remove('collapsed');
+      basicCat.querySelector('.palette-category-header')?.classList.add('active-category');
+    }
+  }
+
+  // Retint the ground shadow
+  if (FROSTED_VARIANTS[id]) {
+    shadowMat.color.set(FROSTED_VARIANTS[id].bottom);
+  } else if (id === 'blackFriday') {
+    shadowMat.color.set('#1a0052');
+  }
+
+  // Auto-switch background: black for Black Friday, white for basic
+  if (id === 'blackFriday') {
+    scene.background = new THREE.Color('#000000');
+    document.querySelectorAll('#bgSelector .bg-swatch')
+      .forEach(b => b.classList.toggle('active', b.dataset.bg === '#000000'));
+  } else if (FROSTED_VARIANTS[id]) {
+    scene.background = new THREE.Color('#ffffff');
+    document.querySelectorAll('#bgSelector .bg-swatch')
+      .forEach(b => b.classList.toggle('active', b.dataset.bg === '#ffffff'));
+  }
+  // Sync the Harmony accent (ribbon) to the paired companion color
+  const harmony = HARMONY_BY_BODY[id];
+  if (harmony) {
+    ribbonGrayMat.color.set(harmony);
+    const harmonyDot = document.querySelector('.chip[data-mat="ribbonGray"] .dot');
+    if (harmonyDot) harmonyDot.style.background = harmony;
+  }
+  const harmony2 = HARMONY2_BY_BODY[id];
+  if (harmony2) harmony2Mat.color.set(harmony2);
+}
+
+let openMatKey = null;
+function openSettingsFor(matKey, matType) {
+  if (!IS_ADMIN) return;
+  openMatKey = matKey;
+  const labelMap = {
+    frostedBlue:     'Genuine Blue',
+    frostedGreen:    'Jade Green',
+    frostedOrange:   'Mango Orange',
+    frostedRed:      'Coral Red',
+    frostedViolet:   'Violet',
+    frostedDarkBlue: 'Dark Blue',
+    frostedPink:     'Candy Pink',
+    blackFriday:     'Purple Chrome',
+    glass:           'Glass (Built-in)',
+    chrome:          'Chrome (Built-in)',
+    lensGlass:       'Lens Glass (Built-in)',
+    cameraLens:      'Camera Lens (Built-in)',
+  };
+  settingsTitle.textContent = labelMap[matKey] || matKey;
+  renderControls(matKey, matType);
+  chips.forEach(c => c.classList.toggle('settings-open', c.dataset.mat === matKey));
+  settingsPanel.hidden = false;
+}
+function closeSettings() {
+  if (!IS_ADMIN) return;
+  openMatKey = null;
+  chips.forEach(c => c.classList.remove('settings-open'));
+  settingsPanel.hidden = true;
+}
+
+function renderControls(matKey, matType) {
+  const schema = CONTROL_SCHEMAS[matType];
+  const mat = editableMaterials[matKey];
+  const s = state[matKey];
+  controlsEl.innerHTML = '';
+  for (const c of schema) {
+    const row = document.createElement('label');
+
+    // Color picker branch — gradient top/bottom hex colors. Mutates
+    // FROSTED_VARIANTS so the chosen colors propagate to every asset
+    // that renders the same variant, the shadow tint, and the chip
+    // swatch preview.
+    if (c.type === 'color' && c.custom) {
+      const input = document.createElement('input');
+      input.type = 'color';
+      const hex = document.createElement('span');
+      hex.className = 'val hex';
+      const current = s[c.key] ?? FROSTED_VARIANTS[matKey]?.[c.key];
+      input.value = current;
+      hex.textContent = current;
+      input.addEventListener('input', () => {
+        const v = input.value;
+        hex.textContent = v;
+        s[c.key] = v;
+        applyFrostedColor(matKey, c.key, v);
+      });
+      row.append(document.createTextNode(c.label + ' '), input, hex);
+      controlsEl.appendChild(row);
+      continue;
+    }
+
+    const valueText = document.createElement('span');
+    valueText.className = 'val';
+    const current = s[c.key] ?? mat[c.key];
+    valueText.textContent = (+current).toFixed(2);
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = c.min; input.max = c.max; input.step = c.step;
+    input.value = current;
+    input.addEventListener('input', () => {
+      const v = parseFloat(input.value);
+      valueText.textContent = v.toFixed(2);
+      s[c.key] = v;
+      if (c.custom && c.key === 'gradientStrength') {
+        const variant = FROSTED_VARIANTS[matKey];
+        const t = makeVerticalGradient(variant.top, variant.bottom, v);
+        if (mat.map) mat.map.dispose();
+        mat.map = t;
+        mat.needsUpdate = true;
+      } else if (c.custom && (c.key === 'colorR' || c.key === 'colorG' || c.key === 'colorB')) {
+        const r = s.colorR ?? mat.color.r;
+        const g = s.colorG ?? mat.color.g;
+        const b = s.colorB ?? mat.color.b;
+        mat.color.setRGB(r, g, b);
+        mat.needsUpdate = true;
+      } else {
+        mat[c.key] = v;
+        mat.needsUpdate = true;
+      }
+    });
+    row.append(document.createTextNode(c.label + ' '), input, valueText);
+    controlsEl.appendChild(row);
+  }
+}
+
+// Apply a new gradient color (top or bottom) to a frosted variant:
+// regenerate the gradient texture, retint the chip swatch preview,
+// and sync the shadow color if this variant is currently active.
+function applyFrostedColor(matKey, key, hex) {
+  const variant = FROSTED_VARIANTS[matKey];
+  if (!variant) return;
+  variant[key] = hex;
+  const mat = editableMaterials[matKey];
+  const strength = state[matKey].gradientStrength ?? FROSTED_PRESET.gradientStrength;
+  const t = makeVerticalGradient(variant.top, variant.bottom, strength);
+  if (mat.map) mat.map.dispose();
+  mat.map = t;
+  mat.needsUpdate = true;
+  // Chip swatch shows via `--top` and `--bot` CSS variables.
+  const chip = document.querySelector(`.chip[data-mat="${matKey}"]`);
+  if (chip) {
+    if (key === 'top')    chip.style.setProperty('--top', hex);
+    if (key === 'bottom') chip.style.setProperty('--bot', hex);
+  }
+  // Keep the ground shadow and palette dot in sync with the bottom hex.
+  if (key === 'bottom' && matKey === activeVariantId) {
+    shadowMat.color.set(hex);
+  }
+}
+
+// ── Category collapse/expand ──────────────────────────────
+document.querySelectorAll('.palette-category-header').forEach(header => {
+  header.addEventListener('click', () => {
+    header.closest('.palette-category').classList.toggle('collapsed');
+  });
+});
+
+// Chip events
+chips.forEach(chip => {
+  const id = chip.dataset.mat;
+  const type = chip.dataset.matType;
+  const isBuiltin = chip.classList.contains('builtin');
+  chip.querySelector('.swatch').addEventListener('click', () => {
+    if (isBuiltin) return;
+    setActiveMaterial(id);
+    if (!settingsPanel.hidden && openMatKey) openSettingsFor(id, type);
+  });
+  chip.querySelector('.gear')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpenForThis = !settingsPanel.hidden && openMatKey === id;
+    if (isOpenForThis) {
+      closeSettings();
+    } else {
+      if (!isBuiltin) setActiveMaterial(id);
+      openSettingsFor(id, type);
+    }
+  });
+});
+
+// Black Friday standalone button
+document.getElementById('bfButton').addEventListener('click', () => {
+  setActiveMaterial('blackFriday');
+  if (!settingsPanel.hidden && openMatKey === 'blackFriday') {
+    // already open — keep it
+  } else if (!settingsPanel.hidden) {
+    openSettingsFor('blackFriday', 'blackFriday');
+  }
+});
+document.getElementById('bfGear').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = !settingsPanel.hidden && openMatKey === 'blackFriday';
+  if (isOpen) {
+    closeSettings();
+  } else {
+    setActiveMaterial('blackFriday');
+    openSettingsFor('blackFriday', 'blackFriday');
+  }
+});
+
+// Asset switcher
+document.querySelectorAll('.asset-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.asset-chip').forEach(b => b.classList.toggle('active', b === btn));
+    loadAsset(btn.dataset.asset);
+    refreshAssetSettings();
+  });
+});
+
+// ── Asset settings (admin) ─────────────────────────────────
+// Per-asset gradientYShift slider — lets the designer tune how the
+// frosted gradient maps onto each model from the live UI without
+// having to edit ASSETS{} and reload. Stays hidden in user mode.
+const assetSettingsPanel = document.getElementById('assetSettings');
+const gradYShiftInput    = document.getElementById('gradYShift');
+const gradYShiftVal      = document.getElementById('gradYShiftVal');
+
+function refreshAssetSettings() {
+  if (!IS_ADMIN) return;
+  const a = ASSETS[currentAssetId];
+  if (!a) return;
+  const v = a.gradientYShift ?? 0;
+  gradYShiftInput.value = v;
+  gradYShiftVal.textContent = v.toFixed(2);
+  refreshViewOverridesUI();
+}
+
+// Paint the per-view status rows — defaults come from VIEW_DIRS, but
+// if the asset has a viewOverrides entry we highlight it and enable
+// the reset button so the designer can revert one view at a time.
+function refreshViewOverridesUI() {
+  const a = ASSETS[currentAssetId];
+  if (!a) return;
+  for (const item of document.querySelectorAll('.capture-item')) {
+    const viewId = item.dataset.view;
+    const override = a.viewOverrides?.[viewId];
+    const effective = override || VIEW_DIRS[viewId];
+    const short = `[${effective.map(n => n.toFixed(2)).join(', ')}]`;
+    const full  = `[${effective.map(n => (+n).toFixed(3)).join(', ')}]`;
+    const valEl = item.querySelector('.capture-val');
+    valEl.textContent = short;
+    valEl.classList.toggle('overridden', !!override);
+    item.querySelector('.capture-full').textContent = full;
+    item.querySelector('.capture-btn.reset').disabled = !override;
+  }
+  // After repainting saved values, re-apply the live overlay on the
+  // active view so continuous rotation keeps showing current camera.
+  updateActiveViewLiveDisplay();
+}
+
+// Overwrite the active view's short value with the live camera position.
+// Called from the OrbitControls 'change' event in admin mode — keeps the
+// "View N [x, y, z]" label synced with what the designer is seeing, so
+// they don't have to press Save just to preview the numbers.
+function updateActiveViewLiveDisplay() {
+  if (!IS_ADMIN || !currentMaxDim) return;
+  const activeBtn = document.querySelector('#viewSelector .view-btn.active');
+  if (!activeBtn) return;
+  const item = document.querySelector(`.capture-item[data-view="${activeBtn.dataset.view}"]`);
+  if (!item) return;
+  const d = currentMaxDim * 2.0;
+  const x = camera.position.x / d;
+  const y = camera.position.y / d;
+  const z = camera.position.z / d;
+  item.querySelector('.capture-val').textContent =
+    `[${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}]`;
+}
+
+if (IS_ADMIN) {
+  assetSettingsPanel.hidden = false;
+  refreshAssetSettings();
+  // Live-update the active view's coordinate label as the user orbits,
+  // so they don't need to press Save just to see the current camera pos.
+  controls.addEventListener('change', updateActiveViewLiveDisplay);
+  // Coalesce rapid slider events into one reload per frame so dragging
+  // doesn't queue up dozens of full asset rebuilds back-to-back.
+  let pendingReload = false;
+  gradYShiftInput.addEventListener('input', () => {
+    const v = parseFloat(gradYShiftInput.value);
+    gradYShiftVal.textContent = v.toFixed(2);
+    const a = ASSETS[currentAssetId];
+    if (!a) return;
+    a.gradientYShift = v;
+    if (pendingReload) return;
+    pendingReload = true;
+    requestAnimationFrame(() => {
+      pendingReload = false;
+      loadAsset(currentAssetId);
+    });
+  });
+
+  // Render the current asset from its View 1 onto a white-background
+  // 500×500 canvas and trigger a download — designer drops the file
+  // into /librarythumbnail/ to replace the live-render fallback.
+  async function renderThumbnailPng(assetId) {
+    await loadAsset(assetId);
+    const asset = ASSETS[assetId];
+    const v = asset.viewOverrides?.['1'] || VIEW_DIRS['1'];
+    const d = currentMaxDim * 2.0;
+    camera.position.set(v[0] * d, v[1] * d, v[2] * d);
+    // Match the landing-page live-render framing exactly so saved PNGs
+    // are visually indistinguishable from the fallback render: ~80%
+    // asset, ground shadow off, white background.
+    camera.zoom = 0.8;
+    camera.updateProjectionMatrix();
+    controls.target.set(0, 0, 0);
+    controls.update();
+    const prevBg = scene.background;
+    const prevShadowVisible = shadow.visible;
+    const prevShadowCast = shadowLight.castShadow;
+    scene.background = new THREE.Color('#ffffff');
+    shadow.visible = false;
+    shadowLight.castShadow = false;
+    await new Promise((r) => requestAnimationFrame(r));
+    renderer.render(scene, camera);
+    scene.background = prevBg;
+    shadow.visible = prevShadowVisible;
+    shadowLight.castShadow = prevShadowCast;
+    const srcCanvas = renderer.domElement;
+    const sz = Math.min(srcCanvas.width, srcCanvas.height);
+    const sx = (srcCanvas.width - sz) / 2;
+    const sy = (srcCanvas.height - sz) / 2;
+    const out = document.createElement('canvas');
+    out.width = out.height = 500;
+    const ctx = out.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 500, 500);
+    ctx.drawImage(srcCanvas, sx, sy, sz, sz, 0, 0, 500, 500);
+    return new Promise((resolve) => out.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${assetId}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      // Delay revoke so the download actually starts before the blob
+      // URL is invalidated.
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      resolve();
+    }, 'image/png'));
+  }
+
+  document.getElementById('exportThumbCurrent').addEventListener('click', async () => {
+    await renderThumbnailPng(currentAssetId);
+  });
+  document.getElementById('exportThumbAll').addEventListener('click', async () => {
+    for (const id of Object.keys(ASSETS)) {
+      await renderThumbnailPng(id);
+      // Breather between downloads so the browser doesn't batch or
+      // suppress them.
+      await new Promise((r) => setTimeout(r, 400));
+    }
+  });
+
+  // Capture/reset per-view camera angles. Distance is stored implicitly
+  // via the vector magnitude, matching VIEW_DIRS convention (each entry
+  // = direction * scale, where scale is later multiplied by the asset's
+  // maxDim-derived camera distance).
+  document.querySelectorAll('.capture-item').forEach(item => {
+    const viewId = item.dataset.view;
+    item.querySelector('[data-action="save"]').addEventListener('click', () => {
+      const a = ASSETS[currentAssetId];
+      if (!a) return;
+      const d = currentMaxDim * 2.0;
+      const v = [
+        +(camera.position.x / d).toFixed(3),
+        +(camera.position.y / d).toFixed(3),
+        +(camera.position.z / d).toFixed(3),
+      ];
+      a.viewOverrides = { ...(a.viewOverrides || {}), [viewId]: v };
+      refreshViewOverridesUI();
+    });
+    item.querySelector('[data-action="reset"]').addEventListener('click', () => {
+      const a = ASSETS[currentAssetId];
+      if (!a || !a.viewOverrides) return;
+      delete a.viewOverrides[viewId];
+      if (Object.keys(a.viewOverrides).length === 0) delete a.viewOverrides;
+      refreshViewOverridesUI();
+    });
+  });
+}
+
+document.querySelectorAll('#bgSelector .bg-swatch').forEach(btn => {
+  btn.addEventListener('click', () => {
+    scene.background = new THREE.Color(btn.dataset.bg);
+    document.querySelectorAll('#bgSelector .bg-swatch')
+      .forEach(b => b.classList.toggle('active', b === btn));
+  });
+});
+
+document.getElementById('shadowToggle').addEventListener('click', (e) => {
+  const btn = e.currentTarget;
+  const on = btn.classList.toggle('on');
+  shadow.visible = on;
+  shadowLight.castShadow = on;
+});
+
+function getViewDir(viewId) {
+  const asset = ASSETS[currentAssetId];
+  if (asset?.viewOverrides?.[viewId]) return asset.viewOverrides[viewId];
+  return VIEW_DIRS[viewId];
+}
+let viewTween = null;
+document.querySelectorAll('#viewSelector .view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = getViewDir(btn.dataset.view);
+    if (!v) return;
+    const d = currentMaxDim * 2.0;
+    const targetPos = new THREE.Vector3(v[0] * d, v[1] * d, v[2] * d);
+    const startPos = camera.position.clone();
+    const startZoom = camera.zoom;
+    const targetZoom = 1;
+
+    document.querySelectorAll('#viewSelector .view-btn')
+      .forEach(b => b.classList.toggle('active', b === btn));
+
+    // Cancel any in-progress tween
+    if (viewTween) viewTween.cancel = true;
+    const tween = { cancel: false };
+    viewTween = tween;
+
+    const duration = 600;
+    const t0 = performance.now();
+    (function animate(now) {
+      if (tween.cancel) return;
+      const elapsed = now - t0;
+      // Ease-out cubic
+      const t = Math.min(elapsed / duration, 1);
+      const e = 1 - Math.pow(1 - t, 3);
+
+      camera.position.lerpVectors(startPos, targetPos, e);
+      camera.zoom = startZoom + (targetZoom - startZoom) * e;
+      camera.updateProjectionMatrix();
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      if (t < 1) requestAnimationFrame(animate);
+      else viewTween = null;
+    })(t0);
+  });
+});
+document.getElementById('resetPreset').addEventListener('click', () => {
+  if (!openMatKey) return;
+  const matKey = openMatKey;
+  const mat = editableMaterials[matKey];
+  state[matKey] = { ...INITIAL_STATE[matKey] };
+  const s = state[matKey];
+  const type = mat.userData.paletteId?.startsWith('frosted') ? 'frosted'
+             : mat.userData.paletteId === 'blackFriday' ? 'blackFriday'
+             : mat.userData.paletteId === 'glass'   ? 'glass'
+             : mat.userData.paletteId === 'chrome'  ? 'chrome'
+             : 'frosted';
+  // Gradient top/bottom live on FROSTED_VARIANTS — restore them first
+  // so any texture regeneration below reads the reset colors.
+  if (type === 'frosted' && FROSTED_VARIANTS[matKey]) {
+    FROSTED_VARIANTS[matKey].top    = INITIAL_STATE[matKey].top;
+    FROSTED_VARIANTS[matKey].bottom = INITIAL_STATE[matKey].bottom;
+    const chip = document.querySelector(`.chip[data-mat="${matKey}"]`);
+    if (chip) {
+      chip.style.setProperty('--top', INITIAL_STATE[matKey].top);
+      chip.style.setProperty('--bot', INITIAL_STATE[matKey].bottom);
+    }
+    if (matKey === activeVariantId) shadowMat.color.set(INITIAL_STATE[matKey].bottom);
+  }
+  for (const c of CONTROL_SCHEMAS[type]) {
+    if (c.type === 'color') continue;
+    if (c.custom && c.key === 'gradientStrength') {
+      const variant = FROSTED_VARIANTS[matKey];
+      const t = makeVerticalGradient(variant.top, variant.bottom, s.gradientStrength);
+      if (mat.map) mat.map.dispose();
+      mat.map = t;
+    } else if (c.custom && (c.key === 'colorR' || c.key === 'colorG' || c.key === 'colorB')) {
+      mat.color.setRGB(s.colorR, s.colorG, s.colorB);
+    } else {
+      mat[c.key] = s[c.key];
+    }
+  }
+  mat.needsUpdate = true;
+  renderControls(matKey, type);
+});
+
+// ── PNG 출력 (1080x1080, alpha, 오브젝트만) ────────────────
+// Two-pass composite so the frosted asset doesn't bleed through to the
+// design's background when placed:
+//   pass 1 — silhouette: shadow hidden, scene overrideMaterial set to
+//            opaque white. Captures a white mask shaped like the asset.
+//   pass 2 — normal:     restore shadow + materials, render as before.
+// Composite: silhouette first, normal on top → asset area gets a white
+// backing while the shadow keeps its alpha (so it still blends onto
+// any design background).
+document.getElementById('exportPng').addEventListener('click', () => {
+  // When the shadow is on, widen the canvas so the drop shadow has
+  // room to breathe and doesn't get cropped at the edge.
+  const SIZE_H = 1080;
+  const SIZE_W = shadow.visible ? 1480 : 1080;
+
+  // Reuse the main renderer for export — its PMREM'd HDR environment
+  // and chrome/frosted materials are bound to this specific WebGL
+  // context, so a separate renderer would render the scene without
+  // reflections (chrome goes matte, IBL lighting collapses).
+  const prevPixelRatio = renderer.getPixelRatio();
+  const prevW = renderer.domElement.width  / prevPixelRatio;
+  const prevH = renderer.domElement.height / prevPixelRatio;
+  const prevLeft   = camera.left;
+  const prevRight  = camera.right;
+  const prevTop    = camera.top;
+  const prevBottom = camera.bottom;
+  const prevBg = scene.background;
+  const prevShadowVisible = shadow.visible;
+
+  renderer.setPixelRatio(1);
+  renderer.setSize(SIZE_W, SIZE_H, false);
+  const h = frustumSize;
+  const w = h * (SIZE_W / SIZE_H);
+  camera.left   = -w / 2;
+  camera.right  =  w / 2;
+  camera.top    =  h / 2;
+  camera.bottom = -h / 2;
+  camera.updateProjectionMatrix();
+  scene.background = null;
+  renderer.setClearColor(0x000000, 0);
+
+  // Output canvas — we composite the two passes here.
+  const out = document.createElement('canvas');
+  out.width  = SIZE_W;
+  out.height = SIZE_H;
+  const outCtx = out.getContext('2d');
+
+  // Pass 1: silhouette. Hide the shadow plane (otherwise its 50×50
+  // geometry would render as a fullscreen white rect) and override
+  // every remaining material with opaque white.
+  shadow.visible = false;
+  const silhouetteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  scene.overrideMaterial = silhouetteMat;
+  renderer.render(scene, camera);
+  outCtx.drawImage(renderer.domElement, 0, 0);
+  scene.overrideMaterial = null;
+  silhouetteMat.dispose();
+
+  // Pass 2: normal render on top of the white silhouette.
+  shadow.visible = prevShadowVisible;
+  renderer.render(scene, camera);
+  outCtx.drawImage(renderer.domElement, 0, 0);
+
+  const dataUrl = out.toDataURL('image/png');
+
+  scene.background = prevBg;
+  renderer.setPixelRatio(prevPixelRatio);
+  renderer.setSize(prevW, prevH, false);
+  camera.left   = prevLeft;
+  camera.right  = prevRight;
+  camera.top    = prevTop;
+  camera.bottom = prevBottom;
+  camera.updateProjectionMatrix();
+
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  a.href = dataUrl;
+  a.download = `asset_${ts}.png`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+});
+
+window.addEventListener('resize', () => {
+  const a = window.innerWidth / window.innerHeight;
+  camera.left   = -frustumSize * a / 2;
+  camera.right  =  frustumSize * a / 2;
+  camera.top    =  frustumSize / 2;
+  camera.bottom = -frustumSize / 2;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ── Principles slideshow ──────────────────────────────────
+// Slide content lives in principles/slides.js — that folder is
+// the workspace for the Visual Language interaction's content
+// (slides, principle-only GLBs, overlays). See the module's
+// header comment for how to add new slides / assets.
+let principlesActive = false;
+let principlesSlideIdx = 0;
+let principlesRotating = false;
+let principlesTransitioning = false;
+let savedSceneBg = null;
+
+function tweenAnim(dur, fn) {
+  return new Promise(res => {
+    const t0 = performance.now();
+    (function frame(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      fn(1 - Math.pow(1 - p, 3));
+      p < 1 ? requestAnimationFrame(frame) : res();
+    })(t0);
+  });
+}
+
+function updatePrinciplesNav() {
+  document.getElementById('principlesPrev').toggleAttribute('disabled', principlesSlideIdx === 0);
+  document.getElementById('principlesNext').toggleAttribute('disabled', principlesSlideIdx === PRINCIPLES_SLIDES.length - 1);
+  document.querySelectorAll('#principles .nav-dots button').forEach((d, i) =>
+    d.classList.toggle('active', i === principlesSlideIdx));
+}
+
+function openPrinciples() {
+  principlesActive = true;
+  savedSceneBg = scene.background;
+  scene.background = new THREE.Color('#ffffff');
+  document.body.classList.add('principles-mode');
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('principles').classList.add('active');
+  controls.enabled = false;
+  shadow.visible = false;
+  shadowLight.castShadow = false;
+  // Return the slide-0 promise so embed mode can wait for the
+  // first slide to actually finish loading before revealing the
+  // canvas, instead of relying on a parent postMessage handshake
+  // that races the iframe load event.
+  return goToPrinciplesSlide(0);
+}
+
+function closePrinciples() {
+  principlesActive = false;
+  principlesRotating = false;
+  document.body.classList.remove('principles-mode');
+  document.getElementById('principles').classList.remove('active');
+  document.getElementById('landing').classList.remove('hidden');
+  scene.background = savedSceneBg || new THREE.Color('#ffffff');
+  controls.enabled = true;
+  shadow.visible = false;
+  shadowLight.castShadow = false;
+  group.position.set(0, 0, 0);
+  group.scale.setScalar(1);
+  document.getElementById('mockPhoneUI').style.opacity = '0';
+}
+
+let mockUIActive = false;
+
+async function goToPrinciplesSlide(idx) {
+  if (principlesTransitioning) return;
+  principlesTransitioning = true;
+  principlesRotating = false;
+  principlesSlideIdx = idx;
+
+  document.querySelectorAll('#principles .slide-text').forEach(el => el.classList.remove('visible'));
+  updatePrinciplesNav();
+
+  const mockEl = document.getElementById('mockPhoneUI');
+
+  // ── Exit animation ──────────────────────────────────
+  const hasExiting = currentRoot !== null;
+  if (hasExiting) {
+    if (mockUIActive) {
+      // Mock UI slide: fade out phone screen as-is
+      group.visible = false;
+      await tweenAnim(500, (t) => { mockEl.style.opacity = String(1 - t); });
+      mockEl.style.opacity = '0';
+      group.visible = true;
+      group.scale.setScalar(1);
+      mockUIActive = false;
+    } else {
+      // Normal exit: asset flies to bottom-right
+      const exitStartX = group.position.x;
+      const exitStartY = group.position.y;
+      const exitEndX = currentMaxDim * 2.2;
+      const exitEndY = -currentMaxDim * 1.5;
+      const exitRotStart = currentRoot.rotation.y;
+      const exitRotEnd = exitRotStart + Math.PI * 0.6;
+      shadow.visible = false;
+      shadowLight.castShadow = false;
+      await tweenAnim(700, (t) => {
+        group.position.x = exitStartX + (exitEndX - exitStartX) * t;
+        group.position.y = exitStartY + (exitEndY - exitStartY) * t;
+        currentRoot.rotation.y = exitRotStart + (exitRotEnd - exitRotStart) * t;
+      });
+    }
+  }
+
+  // ── Load & enter ────────────────────────────────────
+  const slide = PRINCIPLES_SLIDES[idx];
+  shadow.visible = false;
+  shadowLight.castShadow = false;
+  group.scale.setScalar(1);
+
+  await loadAsset(slide.asset);
+  if (slide.color) setActiveMaterial(slide.color);
+
+  const v = VIEW_DIRS[slide.view];
+  const d = currentMaxDim * 2.0;
+  camera.position.set(v[0] * d, v[1] * d, v[2] * d);
+  camera.zoom = 0.66;
+  camera.updateProjectionMatrix();
+  controls.target.set(0, 0, 0);
+  controls.update();
+
+  // Entrance: bottom-left → center
+  const endX = 0, endY = 0;
+  const startX = -currentMaxDim * 2.2;
+  const startY = -currentMaxDim * 1.5;
+  const baseRotY = currentRoot.rotation.y;
+  const rotOffset = -Math.PI * 0.6;
+
+  group.position.set(startX, startY, 0);
+  currentRoot.rotation.y = baseRotY + rotOffset;
+
+  await tweenAnim(1200, (t) => {
+    group.position.x = startX + (endX - startX) * t;
+    group.position.y = startY + (endY - startY) * t;
+    currentRoot.rotation.y = baseRotY + rotOffset * (1 - t);
+  });
+
+  // Show text
+  const textEl = document.querySelector(`#principles .slide-text[data-slide="${idx}"]`);
+  if (textEl) textEl.classList.add('visible');
+
+  // ── Slide-specific behaviors ────────────────────────
+  if (slide.mockUI) {
+    // Capture current render as the mock icon
+    await new Promise(r => setTimeout(r, 600));
+    renderer.render(scene, camera);
+    const src = renderer.domElement;
+    const sz = Math.min(src.width, src.height);
+    const sx = (src.width - sz) / 2;
+    const sy = (src.height - sz) / 2;
+    const crop = document.createElement('canvas');
+    crop.width = crop.height = 200;
+    crop.getContext('2d').drawImage(src, sx, sy, sz, sz, 0, 0, 200, 200);
+    document.getElementById('mockIcon').style.backgroundImage = `url(${crop.toDataURL('image/png')})`;
+
+    // Shrink 3D + fade in phone mockup
+    const shrinkDim = currentMaxDim;
+    await tweenAnim(1400, (t) => {
+      group.scale.setScalar(1 - t * 0.85);
+      group.position.x = -shrinkDim * 0.6 * t;
+      group.position.y = shrinkDim * 0.15 * t;
+      const fade = Math.max(0, (t - 0.3) / 0.7);
+      mockEl.style.opacity = String(fade);
+    });
+    mockEl.style.opacity = '1';
+    mockUIActive = true;
+  }
+
+  if (slide.shadow) {
+    await new Promise(r => setTimeout(r, 500));
+    shadow.visible = true;
+    shadowLight.castShadow = true;
+    shadowMat.opacity = 0;
+    await tweenAnim(1200, (t) => { shadowMat.opacity = 0.15 * t; });
+  }
+
+  if (slide.rotate) principlesRotating = true;
+  principlesTransitioning = false;
+}
+
+// Auto-advance through every slide. Used by embed-mode "play" trigger
+// from the parent Visual Language page. Holds each slide for a few
+// seconds after its entrance animation completes before moving on.
+let principlesPlaying = false;
+async function playPrinciplesSequence() {
+  if (principlesPlaying) return;
+  principlesPlaying = true;
+  try {
+    for (let i = 0; i < PRINCIPLES_SLIDES.length; i++) {
+      if (!principlesActive) break;
+      await goToPrinciplesSlide(i);
+      if (i < PRINCIPLES_SLIDES.length - 1 && principlesActive) {
+        await new Promise(r => setTimeout(r, 4500));
+      }
+    }
+  } finally {
+    principlesPlaying = false;
+  }
+}
+
+document.getElementById('principlesClose').addEventListener('click', closePrinciples);
+document.getElementById('principlesPrev').addEventListener('click', () => {
+  if (principlesSlideIdx > 0) goToPrinciplesSlide(principlesSlideIdx - 1);
+});
+document.getElementById('principlesNext').addEventListener('click', () => {
+  if (principlesSlideIdx < PRINCIPLES_SLIDES.length - 1) goToPrinciplesSlide(principlesSlideIdx + 1);
+});
+document.querySelectorAll('#principles .nav-dots button').forEach((btn, i) => {
+  btn.addEventListener('click', () => goToPrinciplesSlide(i));
+});
+document.addEventListener('keydown', (e) => {
+  if (!principlesActive) return;
+  if (e.key === 'ArrowRight' && principlesSlideIdx < PRINCIPLES_SLIDES.length - 1) goToPrinciplesSlide(principlesSlideIdx + 1);
+  if (e.key === 'ArrowLeft' && principlesSlideIdx > 0) goToPrinciplesSlide(principlesSlideIdx - 1);
+  if (e.key === 'Escape') closePrinciples();
+});
+
+let mouseNX = 0, mouseNY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseNX = (e.clientX / window.innerWidth - 0.5) * 2;
+  mouseNY = (e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+function tick() {
+  if (principlesActive && currentRoot && !principlesTransitioning) {
+    if (principlesRotating) {
+      currentRoot.rotation.y += 0.002;
+    }
+    const strength = 0.15;
+    const isShadowSlide = PRINCIPLES_SLIDES[principlesSlideIdx]?.shadow;
+    const targetRX = isShadowSlide ? 0 : mouseNY * strength;
+    const targetRY = mouseNX * strength;
+    group.rotation.x += (targetRX - group.rotation.x) * 0.05;
+    group.rotation.y += (targetRY - group.rotation.y) * 0.05;
+  } else {
+    group.rotation.x = 0;
+    group.rotation.y = 0;
+  }
+  controls.update();
+  // In variants mode the main canvas is hidden — drive the per-slot
+  // mini-renderers from this same animation frame so all five
+  // assets stay in sync.
+  if (window.__variantSlots) {
+    for (const slot of window.__variantSlots) {
+      if (slot.root) slot.renderer.render(slot.scene, slot.camera);
+    }
+  } else {
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(tick);
+}
+tick();
+
+// ── Embed mode ────────────────────────────────────────────
+// Walkthrough mini build — this page is the principles slideshow,
+// stripped of the customizer / variants / library UI. Hard-pin the
+// embed flag on so the bootstrap below takes the principles branch
+// unconditionally. The legacy ?embed=principles query is no longer
+// required.
+const IS_PRINCIPLES_EMBED = true;
+
+// `?autoexport=all` runs every asset through the same render the
+// landing page uses, then exposes the resulting PNGs as base64 on
+// `window.__exportedThumbs` and signals completion via
+// `window.__exportDone`. A puppeteer-driven script polls these and
+// writes the PNGs straight into `librarythumbnail/`, skipping the
+// browser-download → manual-move dance.
+const IS_AUTO_EXPORT =
+  new URLSearchParams(window.location.search).get('autoexport') === 'all';
+
+// `?mode=variants` boots into the temporary tone-comparison view —
+// hides the customizer chrome, shows a side panel with Asset selector,
+// 5 customizable variant slots (A–E), and a slider stack for the
+// frosted-body parameters. Designers tune each slot independently to
+// land on a direction the team can align on.
+const IS_VARIANTS_MODE =
+  new URLSearchParams(window.location.search).get('mode') === 'variants';
+
+// Field schema mirrors the admin's frosted controls so the value
+// ranges are consistent with what designers already work with.
+const VARIANT_FIELDS = [
+  { key: 'gradientTop',         label: 'Gradient Top',      type: 'color' },
+  { key: 'gradientBottom',      label: 'Gradient Bottom',   type: 'color' },
+  { key: 'transmission',        label: 'Transmission',      type: 'range', min: 0,   max: 1,     step: 0.01 },
+  { key: 'roughness',           label: 'Roughness',         type: 'range', min: 0,   max: 1,     step: 0.01 },
+  { key: 'thickness',           label: 'Thickness',         type: 'range', min: 0,   max: 4,     step: 0.01 },
+  { key: 'ior',                 label: 'IOR',               type: 'range', min: 1,   max: 2.333, step: 0.01 },
+  { key: 'clearcoat',           label: 'Clearcoat',         type: 'range', min: 0,   max: 1,     step: 0.01 },
+  { key: 'clearcoatRoughness',  label: 'Coat Roughness',    type: 'range', min: 0,   max: 1,     step: 0.01 },
+  { key: 'attenuationDistance', label: 'Attenuation',       type: 'range', min: 0.2, max: 8,     step: 0.01 },
+  { key: 'gradientStrength',    label: 'Gradient Strength', type: 'range', min: 0,   max: 1,     step: 0.01 },
+];
+
+// Each variant slot now holds two color sub-slots (Blue / Red) so a
+// designer can lock in a paired palette per A–E slot. Defaults pull
+// from the existing frostedBlue / frostedRed library tones.
+const VARIANT_KEYS   = ['A', 'B', 'C', 'D', 'E'];
+const VARIANT_COLORS = ['blue', 'red'];
+
+// Per-variant defaults. A keeps the canonical FROSTED_VARIANTS preset
+// as the baseline; B → E walk transmission up (0.80 → 1.00) with the
+// gradient top progressively darkening toward the bottom (lighter ─►
+// fully saturated at E). Same progression applies to both Blue and
+// Red sides so toggling Color compares matched-tone slots.
+const BLUE_BOTTOM = '#00A1FF';
+const RED_BOTTOM  = '#FF4747';
+const BLUE_VARIANT_OVERRIDES = {
+  A: null, // canonical frostedBlue preset
+  B: { gradientTop: '#B3D4FF', gradientBottom: BLUE_BOTTOM, transmission: 0.80 },
+  C: { gradientTop: '#9BC5FD', gradientBottom: BLUE_BOTTOM, transmission: 0.85 },
+  D: { gradientTop: '#81B7FD', gradientBottom: BLUE_BOTTOM, transmission: 0.90 },
+  E: { gradientTop: BLUE_BOTTOM, gradientBottom: BLUE_BOTTOM, transmission: 1.00 },
+};
+const RED_VARIANT_OVERRIDES = {
+  A: null, // canonical frostedRed preset
+  B: { gradientTop: '#FFC6AD', gradientBottom: RED_BOTTOM, transmission: 0.80 },
+  C: { gradientTop: '#FFB899', gradientBottom: RED_BOTTOM, transmission: 0.85 },
+  D: { gradientTop: '#FD9F77', gradientBottom: RED_BOTTOM, transmission: 0.90 },
+  E: { gradientTop: RED_BOTTOM, gradientBottom: RED_BOTTOM, transmission: 1.00 },
+};
+const BLUE_BASE = {
+  gradientTop:    FROSTED_VARIANTS.frostedBlue.top,
+  gradientBottom: FROSTED_VARIANTS.frostedBlue.bottom,
+  ...FROSTED_VARIANTS.frostedBlue.preset,
+};
+const RED_BASE = {
+  gradientTop:    FROSTED_VARIANTS.frostedRed.top,
+  gradientBottom: FROSTED_VARIANTS.frostedRed.bottom,
+  ...FROSTED_VARIANTS.frostedRed.preset,
+};
+const VARIANT_DEFAULTS = {
+  A: { blue: { ...BLUE_BASE, ...(BLUE_VARIANT_OVERRIDES.A || {}) }, red: { ...RED_BASE, ...(RED_VARIANT_OVERRIDES.A || {}) } },
+  B: { blue: { ...BLUE_BASE, ...BLUE_VARIANT_OVERRIDES.B },          red: { ...RED_BASE, ...RED_VARIANT_OVERRIDES.B } },
+  C: { blue: { ...BLUE_BASE, ...BLUE_VARIANT_OVERRIDES.C },          red: { ...RED_BASE, ...RED_VARIANT_OVERRIDES.C } },
+  D: { blue: { ...BLUE_BASE, ...BLUE_VARIANT_OVERRIDES.D },          red: { ...RED_BASE, ...RED_VARIANT_OVERRIDES.D } },
+  E: { blue: { ...BLUE_BASE, ...BLUE_VARIANT_OVERRIDES.E },          red: { ...RED_BASE, ...RED_VARIANT_OVERRIDES.E } },
+};
+
+const COLOR_LABELS = { blue: 'Blue', red: 'Red' };
+
+// Storage key bumped to _v5 because Red B→E now have distinct tones
+// matching the Blue progression. Old _v4 snapshots would override the
+// new Red defaults — fresh key forces a reset.
+const VARIANTS_STORAGE_KEY = 'ohouseVariantsSavedDefaults_v5';
+
+function freshDefaults() {
+  const out = {};
+  for (const k of VARIANT_KEYS) {
+    out[k] = {};
+    for (const c of VARIANT_COLORS) {
+      out[k][c] = { ...VARIANT_DEFAULTS[k][c] };
+    }
+  }
+  return out;
+}
+
+function loadVariantSavedDefaults() {
+  try {
+    const raw = localStorage.getItem(VARIANTS_STORAGE_KEY);
+    if (!raw) return freshDefaults();
+    const parsed = JSON.parse(raw);
+    const out = freshDefaults();
+    for (const k of VARIANT_KEYS) {
+      for (const c of VARIANT_COLORS) {
+        if (parsed?.[k]?.[c] && typeof parsed[k][c] === 'object') {
+          // Merge with the per-key default so newly-added fields fall
+          // back to the slot's default value instead of becoming
+          // `undefined` and crashing the slider.
+          out[k][c] = { ...VARIANT_DEFAULTS[k][c], ...parsed[k][c] };
+        }
+      }
+    }
+    return out;
+  } catch {
+    return freshDefaults();
+  }
+}
+
+function persistVariantSavedDefaults() {
+  try {
+    localStorage.setItem(VARIANTS_STORAGE_KEY, JSON.stringify(variantSavedDefaults));
+  } catch {}
+}
+
+const variantSavedDefaults = loadVariantSavedDefaults();
+// Deep clone so the live store and the saved snapshot are independent.
+const variantStore = JSON.parse(JSON.stringify(variantSavedDefaults));
+
+let activeVariantKey   = 'A';
+let activeVariantColor = 'blue';
+
+function getActiveParams() {
+  return variantStore[activeVariantKey][activeVariantColor];
+}
+function getActiveSavedParams() {
+  return variantSavedDefaults[activeVariantKey][activeVariantColor];
+}
+
+// Apply the slot's params to the shared frosted material. Now that
+// every variant asset is registered at a comparable world size
+// (modelScale chosen so each body lands in the ~300 unit ballpark),
+// transmission absorption is consistent across the five slots and
+// per-asset compensation is unnecessary — one mutation propagates.
+function applyVariant(key = activeVariantKey, color = activeVariantColor) {
+  const params = variantStore[key]?.[color];
+  if (!params) return;
+  const mat = materials.frostedBlue;
+  if (mat) {
+    mat.transmission        = params.transmission;
+    mat.roughness           = params.roughness;
+    mat.thickness           = params.thickness;
+    mat.ior                 = params.ior;
+    mat.clearcoat           = params.clearcoat;
+    mat.clearcoatRoughness  = params.clearcoatRoughness;
+    mat.attenuationDistance = params.attenuationDistance;
+    // attenuationColor tints transmissive light. The body material was
+    // built as frostedBlue (blue attenuation baked in), so swapping only
+    // the gradient map left a blue cast on the lower body in Red mode.
+    // Track the bottom hex so transmitted light matches the gradient.
+    mat.attenuationColor.set(params.gradientBottom);
+    if (mat.map) mat.map.dispose();
+    mat.map = makeVerticalGradient(params.gradientTop, params.gradientBottom, params.gradientStrength);
+    mat.needsUpdate = true;
+  }
+  // Sync harmony accents (ribbonGray + harmony2) with the active color
+  // direction so meshes like lens-tape, body-tape, Disc, handle_mat
+  // pick up the matching tonal companion when the user toggles
+  // Blue ↔ Red. We map the variant color to the corresponding library
+  // preset (frostedBlue / frostedRed) and pull both harmony hexes.
+  const bodyPresetKey = color === 'red' ? 'frostedRed' : 'frostedBlue';
+  const harmony  = HARMONY_BY_BODY[bodyPresetKey];
+  const harmony2 = HARMONY2_BY_BODY[bodyPresetKey];
+  if (harmony)  ribbonGrayMat.color.set(harmony);
+  if (harmony2) harmony2Mat.color.set(harmony2);
+}
+
+function renderVariantControls() {
+  const container = document.getElementById('variantsControls');
+  if (!container) return;
+  const params = getActiveParams();
+  container.innerHTML = VARIANT_FIELDS.map((f) => {
+    const v = params[f.key];
+    if (f.type === 'color') {
+      return `
+        <div class="variants-row is-color" data-key="${f.key}">
+          <label>${f.label}</label>
+          <input type="color" class="variants-color-swatch" data-key="${f.key}" value="${v}">
+          <input type="text" class="variants-hex-input" data-key="${f.key}" value="${String(v).toUpperCase()}" maxlength="7" spellcheck="false">
+        </div>`;
+    }
+    return `
+      <div class="variants-row">
+        <label>${f.label}</label>
+        <input type="range" data-key="${f.key}" min="${f.min}" max="${f.max}" step="${f.step}" value="${v}">
+        <span class="variants-value">${Number(v).toFixed(2)}</span>
+      </div>`;
+  }).join('');
+
+  // Range sliders: live-update the param + the value readout.
+  container.querySelectorAll('input[type="range"]').forEach((input) => {
+    input.addEventListener('input', (e) => {
+      const k = e.target.dataset.key;
+      const val = parseFloat(e.target.value);
+      variantStore[activeVariantKey][activeVariantColor][k] = val;
+      const valSpan = e.target.parentElement.querySelector('.variants-value');
+      if (valSpan) valSpan.textContent = val.toFixed(2);
+      applyVariant();
+    });
+  });
+
+  // Color rows: swatch ↔ hex text mirror each other so the user can
+  // either pick visually via the native picker or type/paste a hex
+  // string directly. Hex input only commits when it parses as a valid
+  // 3- or 6-digit hex (with or without leading #) — partial typing
+  // doesn't fire applyVariant.
+  const HEX_RE = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
+  const normalizeHex = (raw) => {
+    const m = raw.trim().match(HEX_RE);
+    if (!m) return null;
+    const body = m[1];
+    const full = body.length === 3
+      ? body.split('').map((c) => c + c).join('')
+      : body;
+    return '#' + full.toUpperCase();
+  };
+  container.querySelectorAll('.variants-row.is-color').forEach((row) => {
+    const k = row.dataset.key;
+    const swatch = row.querySelector('.variants-color-swatch');
+    const hex    = row.querySelector('.variants-hex-input');
+    swatch.addEventListener('input', () => {
+      const val = swatch.value;
+      variantStore[activeVariantKey][activeVariantColor][k] = val;
+      hex.value = val.toUpperCase();
+      applyVariant();
+    });
+    hex.addEventListener('input', () => {
+      const norm = normalizeHex(hex.value);
+      if (!norm) return;
+      variantStore[activeVariantKey][activeVariantColor][k] = norm;
+      swatch.value = norm;
+      applyVariant();
+    });
+    // On blur, snap the text to the canonical uppercase #RRGGBB form
+    // so half-typed entries don't linger.
+    hex.addEventListener('blur', () => {
+      const norm = normalizeHex(hex.value);
+      hex.value = norm || variantStore[activeVariantKey][activeVariantColor][k].toUpperCase();
+    });
+  });
+
+  const label = document.getElementById('variantsControlsLabel');
+  if (label) {
+    label.textContent = `${activeVariantKey}재질 · ${COLOR_LABELS[activeVariantColor]} — Material Settings`;
+  }
+}
+
+if (IS_PRINCIPLES_EMBED) {
+  document.body.classList.add('principles-embed');
+  // Skip buildLanding — the asset grid is irrelevant in embed mode and
+  // its thumbnail generation is heavy. The slideshow loads each slide's
+  // asset on demand via loadAsset.
+  //
+  // Self-reveal as soon as slide 0 finishes its entrance animation:
+  // the iframe no longer waits for a parent postMessage. This avoids
+  // a race where the parent fires `principles:start` against the
+  // about:blank stage before the iframe has booted, which left the
+  // walkthrough stuck in opacity-0 limbo on first page load.
+  // Manual navigation (arrows + dots) handles every transition from
+  // there — no auto-advance.
+  const reveal = () => document.body.classList.add('principles-shown');
+  openPrinciples().then(reveal, reveal);
+  // Safety net in case the slide-0 promise never settles for any
+  // reason (bad asset URL, etc.) — at least show the stage so the
+  // user isn't staring at an empty box.
+  setTimeout(reveal, 3000);
+  // Backwards compatibility: still honor a parent `principles:start`
+  // message so existing wiring (e.g. a manual Play button elsewhere)
+  // keeps working. Reveal is idempotent — re-adding the class is a
+  // no-op.
+  window.addEventListener('message', (e) => {
+    if (e.data === 'principles:start') reveal();
+  });
+} else if (IS_VARIANTS_MODE) {
+  document.body.classList.add('variants-mode');
+  // Visual identity for the variants tab: title becomes "재질모드"
+  // and the favicon swaps to a palette emoji so the browser tab is
+  // instantly distinguishable from the main library tab.
+  document.title = '재질모드';
+  const variantsFavicon = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="52" font-size="56">🎨</text></svg>`
+  );
+  document.querySelector('link[rel=icon]').setAttribute('href', variantsFavicon);
+
+  // ── Multi-slot stage ─────────────────────────────────────
+  // Show all 5 assets in one screen (2 on top, 3 on bottom) so the
+  // material change applies to every asset simultaneously. Each slot
+  // gets its own renderer / scene / camera, but every asset's body
+  // shares the global `materials.frostedBlue` so a single applyVariant
+  // call updates all five at once.
+  const VARIANT_ASSETS = ['box', 'coupon', 'gift', 'clock', 'camera'];
+  const VARIANT_LABELS = {
+    box: '이사박스', coupon: '쿠폰', gift: '선물상자',
+    clock: '시계', camera: '카메라',
+  };
+  const variantSlots = [];
+
+  function addSlotLights(slotScene) {
+    slotScene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const k = new THREE.DirectionalLight(0xffffff, 1.8);  k.position.set(3, 5, 4);  slotScene.add(k);
+    const f = new THREE.DirectionalLight(0xDCEAFF, 0.75); f.position.set(-4, 2, -3); slotScene.add(f);
+    const r = new THREE.DirectionalLight(0xffffff, 0.4);  r.position.set(0, 3, -5);  slotScene.add(r);
+  }
+
+  function frameSlotCamera(slot) {
+    const asset = ASSETS[slot.id];
+    const v = asset.viewOverrides?.['1'] || VIEW_DIRS['1'];
+    const d = slot.maxDim * 2.0;
+    slot.camera.position.set(v[0] * d, v[1] * d, v[2] * d);
+    const frustum = slot.maxDim * (asset.frameScale ?? 2.2);
+    const w = Math.max(1, slot.cell.clientWidth);
+    const h = Math.max(1, slot.cell.clientHeight);
+    const aspect = w / h;
+    // Pull the framing in a touch (zoom 1 / 1.18) so each cell reads
+    // tight against the asset without bleeding into the cell edges.
+    slot.camera.left   = -frustum * aspect / 2;
+    slot.camera.right  =  frustum * aspect / 2;
+    slot.camera.top    =  frustum / 2;
+    slot.camera.bottom = -frustum / 2;
+    slot.camera.near = -slot.maxDim * 10;
+    slot.camera.far  =  slot.maxDim * 10;
+    slot.camera.zoom = 0.85;
+    slot.camera.updateProjectionMatrix();
+    slot.camera.lookAt(0, 0, 0);
+    slot.renderer.setSize(w, h, false);
+  }
+
+  const stageEl = document.getElementById('variantsStage');
+
+  // Normalize per-asset gradient settings so the gradient maps to the
+  // body bbox identically across all 5 cells. Without this, coupon's
+  // `useFullGradientBox` (which expands the bbox to include the
+  // percent symbol) drops the visible body into the dark half of the
+  // gradient and reads way more saturated than its neighbors. We also
+  // zero out `gradientYShift` so box/camera-specific biases don't
+  // skew the comparison.
+  for (const id of VARIANT_ASSETS) {
+    ASSETS[id].useFullGradientBox = false;
+    ASSETS[id].gradientYShift = 0;
+  }
+
+  (async () => {
+    // Build cells + per-slot Three.js worlds, then sequentially load
+    // each asset and relocate `currentRoot` into the slot's scene so
+    // we end up with five live assets sharing one frosted material.
+    for (const id of VARIANT_ASSETS) {
+      const cell = document.createElement('div');
+      cell.className = 'variants-stage-cell';
+      cell.innerHTML = `<span class="variants-stage-label">${VARIANT_LABELS[id]}</span>`;
+      stageEl.appendChild(cell);
+
+      const slotRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      slotRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      slotRenderer.toneMapping        = renderer.toneMapping;
+      slotRenderer.toneMappingExposure = renderer.toneMappingExposure;
+      slotRenderer.outputColorSpace   = renderer.outputColorSpace;
+      slotRenderer.setClearColor(0xffffff, 1);
+      slotRenderer.shadowMap.enabled = true;
+      slotRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      cell.appendChild(slotRenderer.domElement);
+
+      const slotScene = new THREE.Scene();
+      slotScene.background = new THREE.Color(0xffffff);
+      addSlotLights(slotScene);
+
+      // Per-slot shadow caster: zero-intensity directional light (matches
+      // main scene trick) + ShadowMaterial plane. Each slot needs its own
+      // because shadow maps are renderer-bound. Default off.
+      const slotShadowLight = new THREE.DirectionalLight(0xffffff, 0);
+      slotShadowLight.castShadow = false;
+      slotShadowLight.position.copy(SHADOW_LIGHT_DIR).multiplyScalar(10);
+      slotShadowLight.shadow.mapSize.set(1024, 1024);
+      slotShadowLight.shadow.radius = 8;
+      slotShadowLight.shadow.blurSamples = 20;
+      slotShadowLight.shadow.bias = -0.0005;
+      slotScene.add(slotShadowLight);
+      slotScene.add(slotShadowLight.target);
+
+      const slotShadowMat = new THREE.ShadowMaterial({
+        color: new THREE.Color(0x000000),
+        transparent: true,
+        opacity: 0.18,
+      });
+      const slotShadow = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), slotShadowMat);
+      slotShadow.rotation.x = -Math.PI / 2;
+      slotShadow.receiveShadow = true;
+      slotShadow.visible = false;
+      slotScene.add(slotShadow);
+
+      // PMREM textures are bound to the GL context they were generated
+      // in, so each slot needs its own PMREM. Use a per-slot
+      // PMREMGenerator over RoomEnvironment as a fallback, then swap to
+      // the HDR PMREM when the equirect texture finishes loading.
+      const slotPmrem = new THREE.PMREMGenerator(slotRenderer);
+      slotScene.environment = slotPmrem.fromScene(new RoomEnvironment(), 0.02).texture;
+      const swapToHdr = (hdr) => {
+        slotScene.environment?.dispose?.();
+        slotScene.environment = slotPmrem.fromEquirectangular(hdr).texture;
+      };
+      if (loadedHdrTexture) swapToHdr(loadedHdrTexture);
+      else slotPmremCallbacks.push(swapToHdr);
+
+      const slotCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -10, 10);
+
+      variantSlots.push({
+        id, cell,
+        renderer: slotRenderer, scene: slotScene, camera: slotCamera,
+        root: null, maxDim: 1,
+        shadow: slotShadow, shadowLight: slotShadowLight,
+      });
+    }
+
+    // Sequential loadAsset → relocate each root before the next call,
+    // and force `currentRoot = null` so the next loadAsset doesn't
+    // strip the geometry we just moved into a slot scene.
+    for (const slot of variantSlots) {
+      await loadAsset(slot.id);
+      // Force every body to point at the same frosted material so a
+      // single applyVariant updates all cells at once.
+      setActiveMaterial('frostedBlue');
+      const root = currentRoot;
+      const maxDim = currentMaxDim;
+      group.remove(root);
+      slot.scene.add(root);
+      slot.root = root;
+      slot.maxDim = maxDim;
+      frameSlotCamera(slot);
+
+      // Position per-slot shadow plane + retarget shadow light, mirroring
+      // main loadAsset's logic. Compute bbox from the relocated root so
+      // yOffset/centering is already baked in.
+      const asset = ASSETS[slot.id];
+      const bbox = new THREE.Box3().setFromObject(root);
+      const size = bbox.getSize(new THREE.Vector3());
+      const objectCenterY = bbox.getCenter(new THREE.Vector3()).y;
+      const bevelComp = size.y * (asset.bevelComp ?? 0);
+      slot.shadow.position.y = bbox.min.y + bevelComp;
+      slot.shadow.scale.setScalar(maxDim);
+
+      slot.shadowLight.position.copy(SHADOW_LIGHT_DIR).multiplyScalar(maxDim * 5);
+      slot.shadowLight.position.y += objectCenterY;
+      slot.shadowLight.target.position.set(0, objectCenterY, 0);
+      slot.shadowLight.target.updateMatrixWorld();
+      const shadowExtent = maxDim * 3;
+      slot.shadowLight.shadow.camera.left   = -shadowExtent;
+      slot.shadowLight.shadow.camera.right  =  shadowExtent;
+      slot.shadowLight.shadow.camera.top    =  shadowExtent;
+      slot.shadowLight.shadow.camera.bottom = -shadowExtent;
+      slot.shadowLight.shadow.camera.near   = 0.1;
+      slot.shadowLight.shadow.camera.far    = maxDim * 20;
+      slot.shadowLight.shadow.camera.updateProjectionMatrix();
+
+      // Detach so the next loadAsset doesn't try to dispose this root.
+      currentRoot = null;
+    }
+
+    renderVariantControls();
+    applyVariant();
+  })();
+
+  // Variant chips — switch the active slot. Each slot stores its own
+  // parameter set (initial = VARIANT_DEFAULTS), so swapping is instant
+  // and round-tripping through other slots preserves edits.
+  document.querySelectorAll('#variantsKeyRow .variants-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#variantsKeyRow .variants-chip')
+        .forEach((b) => b.classList.toggle('active', b === btn));
+      activeVariantKey = btn.dataset.variant;
+      renderVariantControls();
+      applyVariant();
+    });
+  });
+
+  // Color chips — toggle the active sub-slot between Blue / Red. Each
+  // (key, color) pair has its own param set, so flipping color swaps
+  // the entire material direction without touching the other slot.
+  document.querySelectorAll('#variantsColorRow .variants-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#variantsColorRow .variants-chip')
+        .forEach((b) => b.classList.toggle('active', b === btn));
+      activeVariantColor = btn.dataset.color;
+      renderVariantControls();
+      applyVariant();
+    });
+  });
+
+  // Shadow chips — flip ground shadow visibility across every slot at
+  // once. Mirrors the main view's shadowToggle (visibility + castShadow
+  // gated together so the shadow map stops rendering when off).
+  document.querySelectorAll('#variantsShadowRow .variants-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#variantsShadowRow .variants-chip')
+        .forEach((b) => b.classList.toggle('active', b === btn));
+      const on = btn.dataset.shadow === 'on';
+      for (const slot of variantSlots) {
+        if (slot.shadow) slot.shadow.visible = on;
+        if (slot.shadowLight) slot.shadowLight.castShadow = on;
+      }
+    });
+  });
+
+  // Set as default — promote the (key, color) slot's current edits
+  // into its persisted "default" layer and write to localStorage so
+  // reloading the page brings them back. Brief in-button confirmation
+  // so the designer knows the save landed.
+  document.getElementById('variantsSet').addEventListener('click', (e) => {
+    variantSavedDefaults[activeVariantKey][activeVariantColor] =
+      { ...variantStore[activeVariantKey][activeVariantColor] };
+    persistVariantSavedDefaults();
+    const btn = e.currentTarget;
+    const original = btn.textContent;
+    btn.textContent = 'Saved ✓';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.disabled = false;
+    }, 1100);
+  });
+
+  // Reset — roll back the active (key, color) slot's live edits to
+  // its last-saved default. Other slots / colors are untouched.
+  document.getElementById('variantsReset').addEventListener('click', () => {
+    variantStore[activeVariantKey][activeVariantColor] =
+      { ...variantSavedDefaults[activeVariantKey][activeVariantColor] };
+    renderVariantControls();
+    applyVariant();
+  });
+
+  // 원래대로 — full factory restore for the active (key, color) slot.
+  // Wipes both the live edits AND the persisted saved layer back to
+  // the per-key VARIANT_DEFAULTS for that color, so Reset also points
+  // back to factory from here.
+  document.getElementById('variantsRestore').addEventListener('click', () => {
+    const stock = VARIANT_DEFAULTS[activeVariantKey][activeVariantColor];
+    variantStore[activeVariantKey][activeVariantColor]         = { ...stock };
+    variantSavedDefaults[activeVariantKey][activeVariantColor] = { ...stock };
+    persistVariantSavedDefaults();
+    renderVariantControls();
+    applyVariant();
+  });
+
+  // ── PNG export ─────────────────────────────────────────
+  // Each PNG is rendered at a fixed square (EXPORT_SIZE) using the
+  // slot's own renderer, so the PMREM-bound HDR / chrome / frosted
+  // materials look correct (they're tied to the slot's GL context).
+  // Two-pass composite mirrors the main library's exportPng:
+  //   pass 1 — overrideMaterial = white silhouette (alpha cleared)
+  //   pass 2 — normal render on top of the white backing
+  // → asset area becomes opaque white-backed; ground shadow keeps its
+  // alpha so the file drops cleanly onto any design surface.
+  const EXPORT_SIZE = 1080;
+
+  async function exportSlotPng(slot, filename) {
+    const r = slot.renderer;
+    const cam = slot.camera;
+    const sceneRef = slot.scene;
+
+    const prevPx = r.getPixelRatio();
+    const prevW  = r.domElement.width  / prevPx;
+    const prevH  = r.domElement.height / prevPx;
+    const prevLeft = cam.left, prevRight = cam.right;
+    const prevTop  = cam.top,  prevBottom = cam.bottom;
+    const prevZoom = cam.zoom;
+    const prevBg = sceneRef.background;
+
+    r.setPixelRatio(1);
+    r.setSize(EXPORT_SIZE, EXPORT_SIZE, false);
+    // Square frustum so framing matches the canvas aspect.
+    const asset = ASSETS[slot.id];
+    const frustum = slot.maxDim * (asset.frameScale ?? 2.2);
+    cam.left = -frustum / 2;
+    cam.right =  frustum / 2;
+    cam.top    =  frustum / 2;
+    cam.bottom = -frustum / 2;
+    cam.zoom = 0.85;
+    cam.updateProjectionMatrix();
+    sceneRef.background = null;
+    r.setClearColor(0x000000, 0);
+
+    const out = document.createElement('canvas');
+    out.width = EXPORT_SIZE;
+    out.height = EXPORT_SIZE;
+    const ctx = out.getContext('2d');
+
+    // Pass 1: silhouette. Hide the shadow plane so the white override
+    // doesn't paint the whole ground plane area as an opaque slab.
+    const prevShadowVisible = slot.shadow ? slot.shadow.visible : false;
+    if (slot.shadow) slot.shadow.visible = false;
+    const silMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    sceneRef.overrideMaterial = silMat;
+    r.render(sceneRef, cam);
+    ctx.drawImage(r.domElement, 0, 0);
+    sceneRef.overrideMaterial = null;
+    silMat.dispose();
+    if (slot.shadow) slot.shadow.visible = prevShadowVisible;
+
+    // Pass 2: normal
+    r.render(sceneRef, cam);
+    ctx.drawImage(r.domElement, 0, 0);
+
+    await new Promise((resolve) => out.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Delay revoke so the browser actually starts the download
+      // before the blob URL is invalidated.
+      setTimeout(() => { URL.revokeObjectURL(url); resolve(); }, 80);
+    }, 'image/png'));
+
+    // Restore slot state
+    sceneRef.background = prevBg;
+    r.setPixelRatio(prevPx);
+    r.setSize(prevW, prevH, false);
+    cam.left = prevLeft; cam.right = prevRight;
+    cam.top  = prevTop;  cam.bottom = prevBottom;
+    cam.zoom = prevZoom;
+    cam.updateProjectionMatrix();
+    // Breather between downloads so Chrome doesn't batch / block them.
+    await new Promise((res) => setTimeout(res, 120));
+  }
+
+  async function exportCurrentSet() {
+    const btn = document.getElementById('variantsExport');
+    btn.disabled = true;
+    const prevLabel = btn.textContent;
+    try {
+      for (const slot of variantSlots) {
+        const name = `${slot.id}_${activeVariantKey}_${activeVariantColor}.png`;
+        btn.textContent = `${slot.id} 다운로드 중…`;
+        await exportSlotPng(slot, name);
+      }
+    } finally {
+      btn.textContent = prevLabel;
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('variantsExport').addEventListener('click', exportCurrentSet);
+
+  // Resize — re-frame every slot's camera + renderer to its cell's
+  // current pixel size. (Cells flex with the viewport via CSS grid.)
+  window.addEventListener('resize', () => {
+    for (const slot of variantSlots) {
+      if (slot.root) frameSlotCamera(slot);
+    }
+  });
+
+  // Expose slots so the main `tick()` can render them in place of the
+  // (now hidden) main canvas.
+  window.__variantSlots = variantSlots;
+} else if (IS_AUTO_EXPORT) {
+  window.__exportedThumbs = {};
+  window.__exportDone = false;
+  window.__exportError = null;
+  (async () => {
+    try {
+      for (const id of Object.keys(ASSETS)) {
+        await loadAsset(id);
+        const asset = ASSETS[id];
+        const v = asset.viewOverrides?.['1'] || VIEW_DIRS['1'];
+        const d = currentMaxDim * 2.0;
+        camera.position.set(v[0] * d, v[1] * d, v[2] * d);
+        camera.zoom = 0.8;
+        camera.updateProjectionMatrix();
+        controls.target.set(0, 0, 0);
+        controls.update();
+        shadow.visible = false;
+        shadowLight.castShadow = false;
+        const prevBg = scene.background;
+        scene.background = new THREE.Color('#ffffff');
+        await new Promise((r) => requestAnimationFrame(r));
+        renderer.render(scene, camera);
+        scene.background = prevBg;
+        const src = renderer.domElement;
+        const sz = Math.min(src.width, src.height);
+        const sx = (src.width - sz) / 2;
+        const sy = (src.height - sz) / 2;
+        const out = document.createElement('canvas');
+        out.width = out.height = 500;
+        const ctx = out.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 500, 500);
+        ctx.drawImage(src, sx, sy, sz, sz, 0, 0, 500, 500);
+        window.__exportedThumbs[id] = out.toDataURL('image/png').split(',')[1];
+      }
+    } catch (err) {
+      window.__exportError = err && err.message || String(err);
+    } finally {
+      window.__exportDone = true;
+    }
+  })();
+} else {
+  buildLanding();
+}
+</script>
+</body>
+</html>
