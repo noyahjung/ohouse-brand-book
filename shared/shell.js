@@ -1,9 +1,10 @@
 // ──────────────────────────────────────────────────────────
-// shell.js — Brand Book shell. Renders the shared header + left
-// sidebar nav into every page. Pages declare their identity via
-// two attributes on <main>:
-//   data-page  — id matched against the NAV registry below to
-//                highlight the active sidebar entry.
+// shell.js — Brand Book shell. Renders a single left sidebar
+// (logo at top, nav in middle, copyright at bottom) into every
+// page. The top header bar has been removed; brand mark now lives
+// inside the sidebar to match the editorial reference layout.
+// Pages declare their identity via two attributes on <main>:
+//   data-page  — id matched against NAV to mark the active link
 //   data-depth — folder depth from the repo root (0 for root,
 //                1 for /assets/*, /walkthrough/) so relative
 //                URLs resolve correctly under both local server
@@ -12,7 +13,6 @@
 
 const NAV = [
   {
-    title: '',
     items: [
       { id: 'about', label: 'About', href: 'index.html' },
     ],
@@ -56,32 +56,6 @@ function rel(path, depth) {
   return depth > 0 ? '../'.repeat(depth) + path : path;
 }
 
-function renderHeader(depth) {
-  const header = document.createElement('header');
-  header.className = 'shell-header';
-  header.innerHTML = `
-    <a href="${rel('index.html', depth)}" class="shell-header-brand">
-      <img src="${rel('logo.svg', depth)}" alt="Ohouse">
-      <span>Ohouse Brand Book</span>
-    </a>
-  `;
-  return header;
-}
-
-function renderFooter() {
-  const footer = document.createElement('footer');
-  footer.className = 'shell-footer';
-  footer.innerHTML = `
-    <nav class="shell-footer-nav">
-      <a href="https://ohou.se" target="_blank" rel="noopener noreferrer">오늘의집</a>
-      <a href="https://www.bucketplace.com/culture/" target="_blank" rel="noopener noreferrer">오늘의집 블로그</a>
-      <a href="https://www.bucketplace.com/careers" target="_blank" rel="noopener noreferrer">Careers</a>
-    </nav>
-    <div class="shell-footer-copy">Copyright © bucketplace Corp. All rights reserved.</div>
-  `;
-  return footer;
-}
-
 function renderNavLink(item, depth, activeId) {
   return `
     <a href="${rel(item.href, depth)}"
@@ -104,15 +78,41 @@ function renderNavItem(item, depth, activeId) {
   return renderNavLink(item, depth, activeId);
 }
 
+function renderSection(section, depth, activeId) {
+  // A section with no title is a flat top-level link (e.g. About).
+  // A section with a title renders the title as a bold parent label
+  // and its items as indented children below — the pattern used in
+  // the editorial reference.
+  if (!section.title) {
+    return `
+      <div class="shell-nav-section shell-nav-section--flat">
+        ${section.items.map(item => renderNavLink(item, depth, activeId)).join('')}
+      </div>
+    `;
+  }
+  return `
+    <div class="shell-nav-section">
+      <div class="shell-nav-section-title">${section.title}</div>
+      <div class="shell-nav-section-body">
+        ${section.items.map(item => renderNavItem(item, depth, activeId)).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderSidebar(depth, activeId) {
   const sidebar = document.createElement('aside');
   sidebar.className = 'shell-sidebar';
-  sidebar.innerHTML = NAV.map(section => `
-    <nav class="shell-nav-section">
-      ${section.title ? `<div class="shell-nav-section-title">${section.title}</div>` : ''}
-      ${section.items.map(item => renderNavItem(item, depth, activeId)).join('')}
+  sidebar.innerHTML = `
+    <a href="${rel('index.html', depth)}" class="shell-sidebar-brand">
+      <img src="${rel('logo.svg', depth)}" alt="">
+      <span>Ohouse Brand Book</span>
+    </a>
+    <nav class="shell-sidebar-nav">
+      ${NAV.map(section => renderSection(section, depth, activeId)).join('')}
     </nav>
-  `).join('');
+    <div class="shell-sidebar-foot">© 2026 Ohouse. All rights reserved.</div>
+  `;
   return sidebar;
 }
 
@@ -122,14 +122,11 @@ function init() {
   const pageId = main.dataset.page;
   const depth  = parseInt(main.dataset.depth || '0', 10);
 
-  document.body.insertBefore(renderHeader(depth), document.body.firstChild);
   document.body.insertBefore(renderSidebar(depth, pageId), main);
 
   if (!main.classList.contains('shell-main')) {
     main.classList.add('shell-main');
   }
-
-  document.body.appendChild(renderFooter());
 }
 
 init();

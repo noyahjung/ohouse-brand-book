@@ -18,22 +18,24 @@
   --bg-soft:      #fafafa;
   --bg-mute:      #f5f5f7;
   --border:       #e5e7eb;
-  --border-soft:  #f1f3f5;
+  --border-soft:  #ececec;
 
   --text:         #111827;
   --text-dim:     #4b5563;
-  --text-mute:    #9ca3af;
+  --text-mute:    #b8b8b8;
 
   --accent:       #111827;
   --accent-hover: #374151;
   --accent-soft:  rgba(17, 24, 39, 0.06);
 
-  --header-h:     64px;
-  --sidebar-w:    260px;
-  --content-max:  800px;
+  --sidebar-w:    300px;
+  --content-max:  920px;
+  --content-pad-x: 80px;
+  --content-pad-top: 64px;
 
-  --radius:       8px;
-  --radius-sm:    6px;
+  --radius:       12px;
+  --radius-sm:    8px;
+  --radius-lg:    24px;
   --transition:   0.15s ease;
 }
 
@@ -75,65 +77,79 @@ code {
   color: var(--text);
 }
 
-/* ── Header ──────────────────────────────────────────────── */
-
-.shell-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: saturate(180%) blur(8px);
-  -webkit-backdrop-filter: saturate(180%) blur(8px);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  z-index: 50;
-}
-.shell-header-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text);
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-}
-.shell-header-brand:hover { text-decoration: none; }
-.shell-header-brand img {
-  width: 26px;
-  height: 26px;
-  display: block;
-}
-
-/* ── Sidebar ─────────────────────────────────────────────── */
+/* ── Sidebar ─────────────────────────────────────────────── *
+ * Single full-height column. Logo at top, nav in the middle,
+ * copyright pinned to the bottom. No background or hard border —
+ * the column reads as quiet whitespace adjacent to the content. */
 
 .shell-sidebar {
   position: fixed;
-  top: var(--header-h);
+  top: 0;
   left: 0;
   bottom: 0;
   width: var(--sidebar-w);
-  border-right: 1px solid var(--border);
   background: var(--bg);
   overflow-y: auto;
-  padding: 24px 16px 40px;
+  /* Top padding compensates for the H1's half-leading
+   * (line-height 1.2 × 38px font ⇒ ~4px above the cap height)
+   * so the symbol top sits flush with the headline's cap top. */
+  padding: calc(var(--content-pad-top) + 4px) 32px 32px;
+  display: flex;
+  flex-direction: column;
   z-index: 40;
 }
 
-.shell-nav-section + .shell-nav-section {
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-soft);
-}
-.shell-nav-section-title {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+/* Brand mark sits at the same y as the content's first headline.
+ * The flex row is sized so the visual cap height of the wordmark
+ * matches the first line of the page H1 — `line-height: 1` keeps
+ * the wordmark snug against the top padding, and the symbol height
+ * is tuned to read at the same optical weight as the headline. */
+.shell-sidebar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 56px;
   color: var(--text);
-  padding: 4px 12px 12px;
-  margin: 0;
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+.shell-sidebar-brand:hover { text-decoration: none; }
+.shell-sidebar-brand img {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.shell-sidebar-nav { flex: 1; }
+
+.shell-nav-section {
+  margin: 0 0 35px;
+}
+.shell-nav-section:last-child { margin-bottom: 0; }
+
+.shell-nav-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 4px;
+  padding: 3px 0;
+  letter-spacing: -0.005em;
+}
+
+.shell-nav-section-body { display: block; }
+
+/* Flat top-level link (e.g. About) — same weight as a group title
+ * since it sits at the parent tier with no children under it. */
+.shell-nav-section--flat > .shell-nav-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  padding: 6px 0;
+}
+.shell-nav-section--flat > .shell-nav-link.active {
+  color: var(--text);
 }
 
 .shell-nav-link {
@@ -141,43 +157,45 @@ code {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 7px 12px;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  color: var(--text-dim);
+  padding: 6px 0 6px 16px;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--text-mute);
   text-decoration: none;
-  transition: background var(--transition), color var(--transition);
+  transition: color var(--transition);
+  border-radius: 0;
+  background: transparent;
+  line-height: 1.5;
 }
 .shell-nav-link:hover {
-  background: var(--bg-soft);
   color: var(--text);
+  background: transparent;
   text-decoration: none;
 }
 .shell-nav-link.active {
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 500;
+  color: var(--text);
+  background: transparent;
+  font-weight: 600;
 }
 
 /* Sub-grouped nav items (e.g. Graphic Assets → Icon / 2D / …)
- * Subgroup label is a non-clickable category divider that sits
- * one tier below the section title (ASSETS) but one tier above
- * its own leaves. Uppercase + muted color reads as "this is a
- * group, not a link"; leaves indent so the parent/child relation
- * is visible at a glance. */
+ * Subgroup label is a quiet non-clickable category divider one
+ * indent in from the section title; its leaves indent one step
+ * further so the hierarchy stays readable. */
 .shell-nav-subgroup {
-  margin: 8px 0 4px;
+  margin: 6px 0 2px;
+  padding-left: 16px;
 }
 .shell-nav-subgroup-title {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--text-mute);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 10px 12px 6px;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 4px 0 2px;
 }
 .shell-nav-subgroup .shell-nav-link {
-  padding-left: 24px;
+  padding-left: 12px;
 }
 
 .shell-nav-tag {
@@ -191,39 +209,92 @@ code {
   flex-shrink: 0;
 }
 
+.shell-sidebar-foot {
+  margin-top: 40px;
+  padding-top: 24px;
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: -0.005em;
+}
+
 /* ── Main content ────────────────────────────────────────── */
 
 .shell-main {
   margin-left: var(--sidebar-w);
-  padding: calc(var(--header-h) + 64px) 64px 96px;
+  padding: var(--content-pad-top) var(--content-pad-x) 120px;
   min-height: 100vh;
 }
 .shell-content {
   max-width: var(--content-max);
 }
 
-.shell-breadcrumb {
-  font-size: 13px;
-  color: var(--text-mute);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+/* Page-label breadcrumb intentionally hidden — content opens
+ * straight into the editorial headline. Markup is kept on each
+ * page so a future redesign can restore the label without an
+ * HTML migration. */
+.shell-breadcrumb { display: none; }
+
+/* ── Content typography simplification ────────────────────
+ * The content column reduces to three text tiers:
+ *   1) Head     — .about-hero h1            (editorial headline)
+ *   2) Sub-head — .about-section h3 / .asset-section h2 /
+ *                 .principle-row-body h3    (section title)
+ *   3) Body     — p                         (paragraphs)
+ * All other small labels, eyebrows, captions, and tags are
+ * suppressed so the page reads as a clean stack of head → body
+ * → image. Markup is left in place so the labels can be
+ * restored later without an HTML migration. */
+.about-section > h2,
+.asset-section-eyebrow,
+.principle-row-head,
+.tov-quote-meta,
+.principle-expression,
+.principle-ko,
+.status-note,
+.status-tag {
+  display: none;
+}
+
+/* With the principle-row-head hidden, the row collapses from a
+ * 2-column grid into a single-column block. */
+.principle-row {
+  grid-template-columns: 1fr;
   gap: 0;
 }
-.shell-breadcrumb a {
-  color: var(--text-mute);
+
+/* Section sub-head normalization — asset / overview / feature
+ * section h2s all read at the same scale as the about-section
+ * h3, so every sub-head is uniform. */
+.asset-section h2,
+.overview-section > h2,
+.overview-feature > h2 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  margin: 0 0 20px;
+  color: var(--text);
+  padding-top: 0;
+  border-top: 0;
 }
-.shell-breadcrumb a:hover {
-  color: var(--text-dim);
-  text-decoration: none;
+
+/* ── Divider rule ─────────────────────────────────────────
+ * Hairline dividers only sit between TOP-LEVEL sections
+ * (about-section, asset-section, overview-section). Dividers
+ * between sub-items inside those sections — asset-tenet rows,
+ * principle rows, workflow steps, the small rule under each
+ * tenet's title — are suppressed so each section reads as one
+ * uninterrupted block. */
+.asset-tenet,
+.asset-tenet:last-child,
+.principle-row,
+.principle-row:last-child,
+.asset-workflow-step,
+.asset-workflow-step:last-child {
+  border-top: 0;
+  border-bottom: 0;
 }
-.shell-breadcrumb span + span::before {
-  content: '/';
-  margin: 0 8px;
-  color: var(--text-mute);
-  opacity: 0.5;
-}
+.asset-tenet-rule { display: none; }
 
 /* ── Typography ──────────────────────────────────────────── */
 
@@ -257,8 +328,8 @@ code {
 .shell-content p {
   margin: 0 0 16px;
   color: var(--text-dim);
-  font-size: 15px;
-  line-height: 1.75;
+  font-size: 16px;
+  line-height: 1.7;
 }
 .shell-content ul, .shell-content ol {
   padding-left: 22px;
@@ -670,48 +741,21 @@ code {
   transform: translateY(-1px);
 }
 
-/* ── Footer ──────────────────────────────────────────────
- * Sits below the main content; mirrors the sidebar offset so
- * its left edge lines up with the page text rather than the
- * viewport. Two stacked rows: link nav + copyright. */
-.shell-footer {
-  margin-left: var(--sidebar-w);
-  padding: 32px 64px 48px;
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-.shell-footer-nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 28px;
-  margin-bottom: 20px;
-}
-.shell-footer-nav a {
-  color: var(--text-dim);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color var(--transition);
-}
-.shell-footer-nav a:hover {
-  color: var(--text);
-  text-decoration: none;
-}
-.shell-footer-copy {
-  color: var(--text-mute);
-  font-size: 13px;
-  letter-spacing: -0.005em;
-}
-
 /* ── Responsive (basic) ─────────────────────────────────── */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   :root {
     --sidebar-w: 220px;
+    --content-pad-x: 56px;
+  }
+}
+@media (max-width: 900px) {
+  :root {
+    --content-pad-x: 40px;
+    --content-pad-top: 48px;
   }
   .shell-main {
-    padding: calc(var(--header-h) + 40px) 32px 64px;
+    padding: var(--content-pad-top) var(--content-pad-x) 80px;
   }
   .shell-content h1 { font-size: 28px; }
   .shell-content h2 { font-size: 20px; }
@@ -722,43 +766,11 @@ code {
   }
   .shell-main {
     margin-left: 0;
-    padding: calc(var(--header-h) + 32px) 20px 56px;
-  }
-  .shell-footer {
-    margin-left: 0;
-    padding: 24px 20px 32px;
-  }
-  .shell-footer-nav {
-    gap: 16px 20px;
+    padding: 32px 20px 56px;
   }
 }
 
 /* ═══ Brand Book additions (formerly shell-v2.css) ═════════ */
-
-/* ── Header v1↔v2 indicator ─────────────────────────────── */
-
-.shell-header-version {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-}
-.shell-header-version-current {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-.shell-header-version-link {
-  color: var(--text-mute);
-}
-.shell-header-version-link:hover {
-  color: var(--accent);
-  text-decoration: none;
-}
 
 /* ── Color stage — animated palette composition ─────────────
  * Shares the same footprint as .about-banner (content-max wide,
@@ -842,17 +854,16 @@ code {
 [data-color-item="c5"]       { top: 60%; left:  4%; width: 13%; }
 [data-color-item="c6"]       { top: 78%; left: 40%; width: 13%; }
 
-/* About hero banner — sits at the very top of the About page.
- * Constrained to the 800px content column so it aligns with the
- * breadcrumb and hero text that follow, instead of breaking out
- * the way .vl-stage does. */
+/* About hero banner — wide editorial image that sits inside the
+ * content column. Rounded with a soft, large corner radius to
+ * match the reference's image treatment. */
 .about-banner {
   width: 100%;
   max-width: var(--content-max);
   aspect-ratio: 16 / 9;
-  margin: 0 0 32px;
+  margin: 0 0 80px;
   background: var(--bg-soft);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 .about-banner img {
@@ -862,30 +873,37 @@ code {
   display: block;
 }
 
-/* ── About / Mission editorial layout ───────────────────── */
-
+/* ── About / Mission editorial layout ───────────────────── *
+ * Heroes sit between the page-label breadcrumb and the long-
+ * read body. The h1 is the editorial headline, the lead is the
+ * supporting paragraph beneath it. Text spans the full content
+ * column so its width matches the visuals that follow. */
 .about-hero {
-  padding: 24px 0 8px;
+  padding: 0 0 8px;
 }
 .about-hero h1 {
-  font-size: 40px;
-  line-height: 1.15;
+  font-size: 38px;
+  line-height: 1.2;
   letter-spacing: -0.02em;
-  margin: 0 0 20px;
+  margin: 0 0 24px;
+  font-weight: 700;
 }
 .about-lead {
-  font-size: 19px;
-  line-height: 1.65;
-  color: var(--text);
-  margin: 0 0 56px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  margin: 0 0 80px;
 }
 
 .about-section {
   border-top: 1px solid var(--border-soft);
-  padding: 40px 0;
+  padding: 56px 0;
 }
 .about-section:last-of-type {
   border-bottom: 1px solid var(--border-soft);
+}
+.about-section .about-banner {
+  margin: 40px 0 0;
 }
 .about-section h2 {
   font-size: 13px;
@@ -893,30 +911,31 @@ code {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-mute);
-  margin: 0 0 16px;
+  margin: 0 0 20px;
 }
 .about-section h3 {
-  font-size: 24px;
+  font-size: 26px;
   line-height: 1.3;
-  letter-spacing: -0.01em;
-  margin: 0 0 16px;
+  letter-spacing: -0.015em;
+  margin: 0 0 20px;
   color: var(--text);
+  font-weight: 700;
 }
 .about-section p {
   font-size: 16px;
   line-height: 1.7;
-  color: var(--text);
-  margin: 0 0 14px;
+  color: var(--text-dim);
+  margin: 0 0 16px;
 }
 .about-section p:last-child {
   margin-bottom: 0;
 }
 
 .about-meta {
-  margin-top: 56px;
+  margin-top: 80px;
   padding-top: 24px;
   border-top: 1px solid var(--border-soft);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-mute);
 }
 
@@ -1098,7 +1117,7 @@ code {
   margin: 0 0 16px;
 }
 .asset-tenet-content p {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.7;
   color: var(--text);
   margin: 0;
@@ -1160,8 +1179,8 @@ code {
   letter-spacing: -0.005em;
 }
 .asset-workflow-step p {
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.7;
   color: var(--text-dim);
   margin: 0;
   max-width: none;
