@@ -4,6 +4,7 @@
 
 - 공개 URL: <https://noyahjung.github.io/ohouse-brand-book/>
 - 시스템 개요·로드맵: [`docs/brand-book.md`](docs/brand-book.md)
+- 레이아웃·디자인 시스템 사양: [`docs/layout.md`](docs/layout.md)
 
 ## 구조
 

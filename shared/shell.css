@@ -117,15 +117,19 @@ code {
 }
 .shell-sidebar-brand:hover { text-decoration: none; }
 .shell-sidebar-brand img {
-  width: 28px;
-  height: 28px;
+  /* Match the active nav block width:
+   *   --sidebar-w (300) − sidebar L/R padding (32×2) − active item
+   *   right margin (8) = 228px.
+   * Height auto-scales by the SVG's 170:26 aspect ratio. */
+  width: calc(var(--sidebar-w) - 72px);
+  height: auto;
   display: block;
 }
 
 .shell-sidebar-nav { flex: 1; }
 
 .shell-nav-section {
-  margin: 0 0 35px;
+  margin: 0 0 20px;
 }
 .shell-nav-section:last-child { margin-bottom: 0; }
 
@@ -174,8 +178,13 @@ code {
 }
 .shell-nav-link.active {
   color: var(--text);
-  background: transparent;
+  background: var(--bg-mute);
   font-weight: 600;
+  border-radius: 6px;
+  /* Small right inset so the grey block has breathing room from
+   * the sidebar's right edge — matches the reference screenshot.
+   * Width matches .shell-mode-toggle (also 8px right inset). */
+  margin-right: 8px;
 }
 
 /* Sub-grouped nav items (e.g. Graphic Assets → Icon / 2D / …)
@@ -215,6 +224,25 @@ code {
   font-size: 11px;
   color: var(--text-mute);
   letter-spacing: -0.005em;
+}
+/* External site links stack vertically above the copyright. Their
+ * type matches the sidebar nav links (13.5px) so they read as nav
+ * extensions rather than tiny legal text. */
+.shell-sidebar-foot-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 28px;
+  font-size: 13.5px;
+}
+.shell-sidebar-foot-links a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.shell-sidebar-foot-links a:hover {
+  color: var(--text);
+  text-decoration: none;
 }
 
 /* ── Main content ────────────────────────────────────────── */
@@ -951,10 +979,6 @@ code {
   grid-template-columns: 200px 1fr;
   gap: 32px;
   padding: 28px 0;
-  border-top: 1px solid var(--border-soft);
-}
-.principle-row:last-child {
-  border-bottom: 1px solid var(--border-soft);
 }
 .principle-row-head {
   font-size: 13px;
@@ -1096,11 +1120,7 @@ code {
   grid-template-columns: 1fr 1fr;
   gap: 48px;
   padding: 40px 0;
-  border-top: 1px solid var(--border-soft);
   align-items: start;
-}
-.asset-tenet:last-child {
-  border-bottom: 1px solid var(--border-soft);
 }
 .asset-tenet-content h3 {
   font-size: 22px;
@@ -1160,10 +1180,6 @@ code {
   grid-template-columns: 56px 1fr;
   gap: 20px;
   padding: 18px 0;
-  border-bottom: 1px solid var(--border-soft);
-}
-.asset-workflow-step:last-child {
-  border-bottom: 0;
 }
 .asset-workflow-num {
   font-size: 13px;
@@ -1206,4 +1222,229 @@ code {
 @media (max-width: 720px) {
   .asset-spec { grid-template-columns: 1fr; gap: 4px 0; }
   .asset-spec dd { margin-bottom: 12px; }
+}
+
+/* ═══ Toggle group additions (new index structure) ═══════════════
+ * Layered on top of the deployed shell. The deployed sidebar ships
+ * with leaf links + subgroups. The new index introduces collapsible
+ * toggle items (로고 ⌄, 그래픽 ⌄, …) styled to blend with the
+ * existing .shell-nav-link so the two coexist visually. */
+
+.shell-nav-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0 6px 16px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--text-mute);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.5;
+  transition: color var(--transition);
+}
+.shell-nav-toggle:hover { color: var(--text); }
+.shell-nav-toggle.open { color: var(--text); }
+
+/* Chevron: down-pointing SVG, rotated -90° when collapsed. */
+.shell-nav-chevron {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: var(--text-mute);
+  transform: rotate(-90deg);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+.shell-nav-toggle.open .shell-nav-chevron {
+  transform: rotate(0deg);
+  color: var(--text);
+}
+.shell-nav-chevron svg { width: 100%; height: 100%; display: block; }
+
+/* Children container — JS toggles [hidden] attr. */
+.shell-nav-children { display: block; }
+.shell-nav-children[hidden] { display: none; }
+
+/* Indent: one level (12px) deeper than the parent toggle's text.
+ * The toggle itself sits at padding-left: 16px; children sit at
+ * 16 + 12 = 28px. Nested toggle children add another 12px → 40px. */
+.shell-nav-children .shell-nav-link,
+.shell-nav-children .shell-nav-toggle {
+  padding-left: 28px;
+}
+.shell-nav-children .shell-nav-children .shell-nav-link,
+.shell-nav-children .shell-nav-children .shell-nav-toggle {
+  padding-left: 40px;
+}
+
+/* ═══ Sidebar mode toggle + tool cards (Guide / Tool) ═══════════
+ * Pill-shaped segmented control sits between the brand mark and
+ * the nav. Switches between two sibling mode-content panes:
+ *   - .shell-sidebar-nav    → Guide (default, page index)
+ *   - .shell-sidebar-tools  → Tool  (catalogue of team tools)
+ * Both inherit `flex: 1` from the parent column; the hidden one
+ * collapses out of layout so the visible pane fills the column. */
+
+.shell-mode-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--bg-mute);
+  border-radius: 999px;
+  padding: 4px;
+  /* 8px right inset so the toggle's width matches the active nav
+   * link's grey block (which also has margin-right: 8px). */
+  margin: 0 8px 28px 0;
+}
+.shell-mode-btn {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-mute);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
+}
+.shell-mode-btn:hover { color: var(--text); }
+.shell-mode-btn.active {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* Tool-mode content pane — mirrors .shell-sidebar-nav's flex role
+ * so the visible pane fills the column and pushes the footer down. */
+.shell-sidebar-tools {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.shell-sidebar-tools[hidden] { display: none; }
+
+.shell-tool-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-mute);
+  border-radius: 14px;
+  text-decoration: none;
+  transition: background var(--transition);
+  /* 8px right inset so card width matches the mode toggle and the
+   * active nav block (228px in the standard 300px sidebar). */
+  margin-right: 8px;
+}
+.shell-tool-card:hover {
+  background: var(--border-soft);
+  text-decoration: none;
+}
+.shell-tool-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.shell-tool-card-icon svg {
+  width: 70%;
+  height: 70%;
+  display: block;
+}
+.shell-tool-card-text {
+  flex: 1;
+  min-width: 0;
+}
+.shell-tool-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+.shell-tool-card-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-mute);
+}
+
+/* ═══ On-this-page TOC (scroll spy) ══════════════════════════
+ * Right-side mini outline that appears only on consolidated
+ * pages (guide / cases / resources merged into one). Sticky to
+ * the viewport; vertical track on the left edge highlights the
+ * currently-visible section via a thick bar replacing the gray
+ * track at the active item's y position. */
+
+.shell-toc {
+  position: fixed;
+  top: calc(var(--content-pad-top) + 4px);
+  right: 40px;
+  width: 180px;
+  font-size: 13px;
+  z-index: 10;
+}
+.shell-toc-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-mute);
+  margin: 0 0 12px;
+  letter-spacing: -0.005em;
+  padding-left: 14px;
+}
+.shell-toc-list {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border-soft);
+}
+.shell-toc-item {
+  padding: 6px 0 6px 14px;
+  margin-left: -1px;                /* overlap parent border */
+  border-left: 2px solid transparent;
+  color: var(--text-mute);
+  text-decoration: none;
+  font-weight: 400;
+  line-height: 1.5;
+  transition: color var(--transition), border-color var(--transition);
+}
+.shell-toc-item:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+.shell-toc-item.active {
+  color: var(--text);
+  font-weight: 600;
+  border-left-color: var(--text);   /* black bar replaces gray track */
+}
+
+/* Hide TOC when there isn't enough horizontal room next to the
+ * 920px content + 80px content padding inside the main column. */
+@media (max-width: 1380px) {
+  .shell-toc { display: none; }
+  .shell-main.has-toc { padding-right: var(--content-pad-x); }
+}
+
+/* When the TOC is visible (≥1380px), reserve right-side space in
+ * .shell-main so body text doesn't run under the fixed TOC.
+ *   TOC width (180) + TOC right offset (40) + 20px gap = 240px */
+@media (min-width: 1381px) {
+  .shell-main.has-toc { padding-right: 240px; }
+}
+
+/* Smooth hash navigation + offset top so section headings don't
+ * jam against the viewport edge when jumped to. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 24px;
 }
