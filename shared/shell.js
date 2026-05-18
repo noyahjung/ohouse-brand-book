@@ -193,6 +193,22 @@ const LOCK_SVG =
   '<path d="M8 1.6c-1.85 0-3.35 1.5-3.35 3.35V6.7H4.2c-.78 0-1.4.63-1.4 1.4v5.5c0 .77.62 1.4 1.4 1.4h7.6c.77 0 1.4-.63 1.4-1.4V8.1c0-.77-.63-1.4-1.4-1.4h-.45V4.95C11.35 3.1 9.85 1.6 8 1.6Zm-1.95 3.35c0-1.08.87-1.95 1.95-1.95s1.95.87 1.95 1.95V6.7h-3.9V4.95Z" fill="currentColor"/>' +
   '</svg>';
 
+// Tool-mode default page — shown in the main column whenever the
+// sidebar mode toggle is set to "도구". Single content block:
+// title + body + image. Path is depth-aware so it works on nested
+// pages too.
+function toolModeHtml(depth) {
+  return `
+    <div class="about-hero">
+      <h1>툴 모드</h1>
+      <p class="about-lead">꺼내 쓰는 브랜드 툴 모음</p>
+    </div>
+    <figure class="about-banner">
+      <img src="${rel('tool_thumbnail.png', depth)}" alt="툴 모드">
+    </figure>
+  `;
+}
+
 function renderModeToggle(mode) {
   return `
     <div class="shell-mode-toggle" role="tablist">
@@ -437,24 +453,15 @@ function setupScrollSpy(toc, headings) {
   else setActive(headings[0].id);
 }
 
-function init() {
-  const main = document.querySelector('main[data-page]');
-  if (!main) return;
-  const pageId = main.dataset.page;
-  const depth  = parseInt(main.dataset.depth || '0', 10);
+// Build (or rebuild) the right-side TOC for whatever content
+// currently lives inside `main`. Called once on init and again
+// each time the main content swaps between guide / tool mode.
+function buildToc(main) {
+  // Remove the previous TOC, if any.
+  const existing = main.querySelector('.shell-toc');
+  if (existing) existing.remove();
+  main.classList.remove('has-toc');
 
-  const sidebar = renderSidebar(depth, pageId);
-  document.body.insertBefore(sidebar, main);
-
-  if (!main.classList.contains('shell-main')) {
-    main.classList.add('shell-main');
-  }
-
-  // Build TOC. First item is always "Overview" pointing to the
-  // page's top block (the h1 / about-hero). Subsequent items are
-  // the in-page section titles — primarily <h2>, falling back to
-  // .principle-row-body h3 on principle-grid pages (color / voice
-  // / visual-principles) which don't use h2s.
   const h1 = main.querySelector('.shell-content h1');
   const sectionEls = Array.from(main.querySelectorAll(
     '.shell-content h2, .shell-content .principle-row-body h3'
@@ -481,6 +488,61 @@ function init() {
       setupScrollSpy(toc, targets);
     }
   }
+}
+
+// Swap the main content column between the page's own content
+// (guide mode) and the tool-mode default page. The page's original
+// HTML is stashed on the main element so guide-mode restoration is
+// lossless. TOC rebuilds for whichever content is showing.
+function applyMainMode(main, mode, depth) {
+  const content = main.querySelector('.shell-content');
+  if (!content) return;
+  if (mode === 'tool') {
+    if (main._guideContentHtml == null) {
+      main._guideContentHtml = content.innerHTML;
+    }
+    content.innerHTML = toolModeHtml(depth);
+  } else {
+    if (main._guideContentHtml != null) {
+      content.innerHTML = main._guideContentHtml;
+      main._guideContentHtml = null;
+    }
+  }
+  buildToc(main);
+}
+
+function init() {
+  const main = document.querySelector('main[data-page]');
+  if (!main) return;
+  const pageId = main.dataset.page;
+  const depth  = parseInt(main.dataset.depth || '0', 10);
+
+  const sidebar = renderSidebar(depth, pageId);
+  document.body.insertBefore(sidebar, main);
+
+  if (!main.classList.contains('shell-main')) {
+    main.classList.add('shell-main');
+  }
+
+  // If tool mode is the persisted state, swap the main content
+  // before the first TOC build so we don't render the wrong outline.
+  if (loadMode() === 'tool') {
+    applyMainMode(main, 'tool', depth);
+  } else {
+    buildToc(main);
+  }
+
+  // Hook the sidebar's mode-toggle click so the main column follows
+  // the sidebar mode in lockstep.
+  sidebar.addEventListener('click', (e) => {
+    const modeBtn = e.target.closest('[data-mode]');
+    if (!modeBtn) return;
+    // Defer one frame so renderSidebar's own handler has already
+    // updated mode storage + sidebar visibility.
+    requestAnimationFrame(() => {
+      applyMainMode(main, loadMode(), depth);
+    });
+  });
 }
 
 init();
