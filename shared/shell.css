@@ -33,7 +33,10 @@
   --sidebar-left: 26px;
   --content-max:  920px;
   --content-pad-x: 80px;
-  --content-pad-top: 100px;
+  /* H1 박스 top — Pretendard 46px Bold(line 1.25)의 cap-inset(~10px)
+   * 만큼 위로 올려서 H1 글자의 시각적 윗 가장자리가 사이드바 토글의
+   * 박스 top(Y=100)에 맞도록. */
+  --content-pad-top: 90px;
   --nav-mute:     rgba(8, 19, 26, 0.6);
 
   --radius:       12px;
@@ -1435,7 +1438,9 @@ code {
 
 .shell-toc {
   position: fixed;
-  top: var(--content-pad-top);
+  /* TOC 라벨 cap top이 토글 top(=100)과 정렬되도록 — 작은 cap-inset
+   * (~4px)만큼 위로 올림. */
+  top: 96px;
   right: 40px;
   width: 180px;
   font-size: 13px;
