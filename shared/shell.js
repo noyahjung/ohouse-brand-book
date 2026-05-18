@@ -127,8 +127,8 @@ const MODE_KEY     = 'ohouse-bb-sidebar-mode';
 const TOOLS = [
   {
     id: 'writing-bot',
-    title: '라이팅 봇',
-    desc: '카피·문구의 톤을 점검하고 다듬어 주는 보조 도구.',
+    title: 'AI 라이팅 봇',
+    desc: '쉽게 브랜드 톤을 적용',
     iconBg: '#ffffff',
     icon: '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
           '<circle cx="15" cy="20" r="9" fill="#34D399"/>' +
@@ -139,7 +139,7 @@ const TOOLS = [
   {
     id: 'visual-tool',
     title: 'Visual Tool',
-    desc: '비주얼 자산을 정리하고 빠르게 꺼내 쓰는 워크플로우.',
+    desc: 'Ton of Voice<br>Ton of Voice',
     iconBg: '#111111',
     icon: '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
           '<path d="M10 9 L20 31 L30 9" stroke="#ffffff" stroke-width="5.5" ' +
@@ -188,15 +188,20 @@ function renderToolCard(tool) {
   `;
 }
 
+const LOCK_SVG =
+  '<svg class="shell-mode-lock" viewBox="0 0 16 16" aria-hidden="true">' +
+  '<path d="M8 1.6c-1.85 0-3.35 1.5-3.35 3.35V6.7H4.2c-.78 0-1.4.63-1.4 1.4v5.5c0 .77.62 1.4 1.4 1.4h7.6c.77 0 1.4-.63 1.4-1.4V8.1c0-.77-.63-1.4-1.4-1.4h-.45V4.95C11.35 3.1 9.85 1.6 8 1.6Zm-1.95 3.35c0-1.08.87-1.95 1.95-1.95s1.95.87 1.95 1.95V6.7h-3.9V4.95Z" fill="currentColor"/>' +
+  '</svg>';
+
 function renderModeToggle(mode) {
   return `
     <div class="shell-mode-toggle" role="tablist">
       <button type="button" role="tab"
               class="shell-mode-btn${mode === 'guide' ? ' active' : ''}"
-              data-mode="guide" aria-selected="${mode === 'guide'}">Guide</button>
+              data-mode="guide" aria-selected="${mode === 'guide'}">가이드</button>
       <button type="button" role="tab"
               class="shell-mode-btn${mode === 'tool' ? ' active' : ''}"
-              data-mode="tool" aria-selected="${mode === 'tool'}">Tool</button>
+              data-mode="tool" aria-selected="${mode === 'tool'}">도구${LOCK_SVG}</button>
     </div>
   `;
 }
@@ -289,7 +294,11 @@ function renderSidebar(depth, activeId) {
   sidebar.className = 'shell-sidebar';
   sidebar.innerHTML = `
     <a href="${rel('index.html', depth)}" class="shell-sidebar-brand">
-      <img src="${rel('logo.svg', depth)}" alt="Ohouse Brand Book">
+      <img class="shell-sidebar-brand-icon" src="${rel('favicon.svg', depth)}" alt="">
+      <span class="shell-sidebar-brand-text">
+        <span class="shell-sidebar-brand-name">오늘의집</span>
+        <span class="shell-sidebar-brand-suffix">브랜드센터</span>
+      </span>
     </a>
     ${renderModeToggle(mode)}
     <nav class="shell-sidebar-nav" data-mode-content="guide" ${mode !== 'guide' ? 'hidden' : ''}>
