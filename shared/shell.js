@@ -20,6 +20,9 @@
 // pages doesn't reset the sidebar to the top.
 // ──────────────────────────────────────────────────────────
 
+// Identity collects single long-scroll pages (로고/컬러/톤오브보이스).
+// Asset still expands 그래픽 into a toggle group whose children are
+// themselves long-scroll pages (그래픽 원칙/아이콘/2D/3D/사진 아이콘).
 const NAV = [
   {
     title: 'Overview',
@@ -30,30 +33,9 @@ const NAV = [
   {
     title: 'Identity',
     items: [
-      {
-        kind: 'toggle', id: 'logo', label: '로고',
-        children: [
-          { id: 'logo-guide',     label: '사용 가이드',    href: 'identity/logo/guide.html' },
-          { id: 'logo-cases',     label: '사용사례',       href: 'identity/logo/cases.html' },
-          { id: 'logo-resources', label: '리소스 사용하기', href: 'identity/logo/resources.html' },
-        ],
-      },
-      {
-        kind: 'toggle', id: 'color', label: '컬러',
-        children: [
-          { id: 'color-guide',     label: '사용 가이드',    href: 'identity/color/guide.html' },
-          { id: 'color-cases',     label: '사용사례',       href: 'identity/color/cases.html' },
-          { id: 'color-resources', label: '리소스 사용하기', href: 'identity/color/resources.html' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'Ton of Voice',
-    items: [
-      { id: 'voice-principles', label: '보이스 원칙',    href: 'voice/principles.html' },
-      { id: 'voice-cases',      label: '사용사례',       href: 'voice/cases.html' },
-      { id: 'voice-resources',  label: '리소스 사용하기', href: 'voice/resources.html' },
+      { id: 'logo',  label: '로고',         href: 'identity/logo.html' },
+      { id: 'color', label: '컬러',         href: 'identity/color.html' },
+      { id: 'voice', label: '톤 오브 보이스', href: 'identity/tone-of-voice.html' },
     ],
   },
   {
@@ -63,57 +45,15 @@ const NAV = [
       {
         kind: 'toggle', id: 'graphic', label: '그래픽',
         children: [
-          { id: 'graphic-principles', label: '그래픽 원칙', href: 'asset/graphic/principles.html' },
-          {
-            kind: 'toggle', id: 'graphic-icon', label: '아이콘',
-            children: [
-              { id: 'icon-guide',     label: '사용 가이드',    href: 'asset/graphic/icon/guide.html' },
-              { id: 'icon-cases',     label: '사용사례',       href: 'asset/graphic/icon/cases.html' },
-              { id: 'icon-resources', label: '리소스 사용하기', href: 'asset/graphic/icon/resources.html' },
-            ],
-          },
-          {
-            kind: 'toggle', id: 'graphic-2d', label: '2D 그래픽 에셋',
-            children: [
-              { id: '2d-guide',     label: '사용 가이드',    href: 'asset/graphic/2d/guide.html' },
-              { id: '2d-cases',     label: '사용사례',       href: 'asset/graphic/2d/cases.html' },
-              { id: '2d-resources', label: '리소스 사용하기', href: 'asset/graphic/2d/resources.html' },
-            ],
-          },
-          {
-            kind: 'toggle', id: 'graphic-3d', label: '3D 그래픽 에셋',
-            children: [
-              { id: '3d-guide',     label: '사용 가이드',    href: 'asset/graphic/3d/guide.html' },
-              { id: '3d-cases',     label: '사용사례',       href: 'asset/graphic/3d/cases.html' },
-              { id: '3d-resources', label: '리소스 사용하기', href: 'asset/graphic/3d/resources.html' },
-            ],
-          },
-          {
-            kind: 'toggle', id: 'graphic-photo-icon', label: '사진 아이콘 에셋',
-            children: [
-              { id: 'photo-icon-guide',     label: '사용 가이드',    href: 'asset/graphic/photo-icon/guide.html' },
-              { id: 'photo-icon-cases',     label: '사용사례',       href: 'asset/graphic/photo-icon/cases.html' },
-              { id: 'photo-icon-resources', label: '리소스 사용하기', href: 'asset/graphic/photo-icon/resources.html' },
-            ],
-          },
+          { id: 'graphic-principles', label: '그래픽 원칙',     href: 'asset/graphic/principles.html' },
+          { id: 'graphic-icon',       label: '아이콘',          href: 'asset/graphic/icon.html' },
+          { id: 'graphic-2d',         label: '2D 그래픽 에셋',  href: 'asset/graphic/2d.html' },
+          { id: 'graphic-3d',         label: '3D 그래픽 에셋',  href: 'asset/graphic/3d.html' },
+          { id: 'graphic-photo-icon', label: '사진 아이콘 에셋', href: 'asset/graphic/photo-icon.html' },
         ],
       },
-      {
-        kind: 'toggle', id: 'photo', label: '포토',
-        children: [
-          { id: 'photo-guide',     label: '사용 가이드',    href: 'asset/photo/guide.html' },
-          { id: 'photo-cases',     label: '사용사례',       href: 'asset/photo/cases.html' },
-          { id: 'photo-resources', label: '리소스 사용하기', href: 'asset/photo/resources.html' },
-        ],
-      },
-      {
-        kind: 'toggle', id: 'pattern', label: '패턴',
-        children: [
-          { id: 'pattern-guide',     label: '사용 가이드',    href: 'asset/pattern/guide.html' },
-          { id: 'pattern-cases',     label: '사용사례',       href: 'asset/pattern/cases.html' },
-          { id: 'pattern-resources', label: '리소스 사용하기', href: 'asset/pattern/resources.html' },
-        ],
-      },
+      { id: 'photo',   label: '포토', href: 'asset/photo.html' },
+      { id: 'pattern', label: '패턴', href: 'asset/pattern.html' },
     ],
   },
 ];
@@ -407,8 +347,9 @@ function renderTOC(items) {
   toc.innerHTML = `
     <div class="shell-toc-title">On this page</div>
     <nav class="shell-toc-list">
-      ${items.map(({ id, label }) => `
-        <a class="shell-toc-item" href="#${id}" data-target-id="${id}">
+      ${items.map(({ id, label, level }) => `
+        <a class="shell-toc-item${level === 'h3' ? ' shell-toc-item--sub' : ''}"
+           href="#${id}" data-target-id="${id}">
           ${label}
         </a>
       `).join('')}
@@ -464,19 +405,23 @@ function buildToc(main) {
 
   const h1 = main.querySelector('.shell-content h1');
   const sectionEls = Array.from(main.querySelectorAll(
-    '.shell-content h2, .shell-content .principle-row-body h3'
+    '.shell-content h2, .shell-content h3, .shell-content .principle-row-body h3'
   ));
 
   const tocItems = [];
   const targets = [];
   if (h1) {
     if (!h1.id) h1.id = 'overview';
-    tocItems.push({ id: h1.id, label: 'Overview' });
+    tocItems.push({ id: h1.id, label: 'Overview', level: 'h1' });
     targets.push(h1);
   }
   sectionEls.forEach((h, i) => {
     if (!h.id) h.id = slugify(h.textContent, i);
-    tocItems.push({ id: h.id, label: h.textContent.trim() });
+    tocItems.push({
+      id: h.id,
+      label: h.textContent.trim(),
+      level: h.tagName.toLowerCase(),
+    });
     targets.push(h);
   });
 
