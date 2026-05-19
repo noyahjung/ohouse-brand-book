@@ -348,7 +348,7 @@ function renderTOC(items) {
     <div class="shell-toc-title">On this page</div>
     <nav class="shell-toc-list">
       ${items.map(({ id, label, level }) => `
-        <a class="shell-toc-item${level === 'h3' ? ' shell-toc-item--sub' : ''}"
+        <a class="shell-toc-item${level === 'h1' ? '' : ' shell-toc-item--sub'}"
            href="#${id}" data-target-id="${id}">
           ${label}
         </a>
@@ -403,19 +403,17 @@ function buildToc(main) {
   if (existing) existing.remove();
   main.classList.remove('has-toc');
 
-  const h1 = main.querySelector('.shell-content h1');
-  const sectionEls = Array.from(main.querySelectorAll(
-    '.shell-content h2, .shell-content h3, .shell-content .principle-row-body h3'
+  // Per the Play Book composition guide every 대분류 is an <h1>
+  // (page overview + 사용 가이드 / 사용 사례 / 리소스 사용하기), so
+  // the TOC lists *all* h1s as top-level entries. h2/h3 inside a
+  // chapter become indented sub-entries.
+  const headings = Array.from(main.querySelectorAll(
+    '.shell-content h1, .shell-content h2, .shell-content h3, .shell-content .principle-row-body h3'
   ));
 
   const tocItems = [];
   const targets = [];
-  if (h1) {
-    if (!h1.id) h1.id = 'overview';
-    tocItems.push({ id: h1.id, label: 'Overview', level: 'h1' });
-    targets.push(h1);
-  }
-  sectionEls.forEach((h, i) => {
+  headings.forEach((h, i) => {
     if (!h.id) h.id = slugify(h.textContent, i);
     tocItems.push({
       id: h.id,

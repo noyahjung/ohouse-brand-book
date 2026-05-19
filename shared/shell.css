@@ -63,14 +63,15 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* Content body links keep an always-on underline so they remain
- * recognizable now that the accent color matches body text. */
-.shell-content a:not(.cta-btn) {
+ * recognizable now that the accent color matches body text.
+ * Pill-style components (cta-btn, content-download) opt out. */
+.shell-content a:not(.cta-btn):not(.content-download) {
   text-decoration: underline;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
   text-decoration-color: var(--text-mute);
 }
-.shell-content a:not(.cta-btn):hover {
+.shell-content a:not(.cta-btn):not(.content-download):hover {
   text-decoration-color: var(--accent);
 }
 
@@ -350,41 +351,38 @@ code {
 
 /* ── Typography ──────────────────────────────────────────── */
 
-/* Content typography — page overview head (h1) shares the same
- * font spec as a chapter head (h2). All heads use the identical
- * heading→body gap (8px), matching the H1↔lead gap on the home page.
- *   Title (h1, h2)  36px Bold     #08131A   line 1.25
- *   Sub-title (h3)  26px Bold     #08131A   line 1.2
- *   Body (p)        16px Medium   rgba(8,19,26,0.5)   line 1.5
- * All share letter-spacing -0.3px. */
+/* Content typography — aligned to the Play Book component sheet:
+ *   Heading 1   46px Bold   #08131A   line 1.25   (대분류)
+ *   Heading 2   26px Bold   #08131A   line 1.2    (소분류)
+ *   Heading 3   26px Bold   #08131A   line 1.2    (소분류, alias)
+ *   Heading 4   26px Bold   #08131A   line 1.2    (카드 라벨)
+ *   Body        16px Medium  rgba(8,19,26,0.5)   line 1.5
+ * Title→body gap = 8px, (title+body)→image gap = 30px,
+ * 대분류↔다음 대분류 gap = 80px (controlled per-block by `.about-section`
+ * or by the `.shell-content h1 + *` reset below). */
 .shell-content h1 {
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  line-height: 1.25;
-  color: #08131A;
-  margin: 0 0 8px;
-}
-.shell-content h2 {
-  font-size: 36px;
+  font-size: 46px;
   font-weight: 700;
   letter-spacing: -0.3px;
   line-height: 1.25;
   color: #08131A;
   margin: 80px 0 8px;
-  padding-top: 0;
-  border-top: 0;
 }
-.shell-content h2:first-of-type {
-  margin-top: 56px;
+.shell-content h1:first-of-type,
+.about-hero h1 {
+  margin-top: 0;
 }
-.shell-content h3 {
+.shell-content h2,
+.shell-content h3,
+.shell-content h4 {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.3px;
   line-height: 1.2;
-  margin: 40px 0 8px;
   color: #08131A;
+  margin: 40px 0 8px;
+  padding-top: 0;
+  border-top: 0;
 }
 .shell-content p {
   margin: 0;
@@ -999,6 +997,88 @@ code {
   color: var(--text-mute);
 }
 
+/* ── Notion-mirrored building blocks ──────────────────────
+ * Mirrors of what editors compose in Notion: 2-column rows
+ * (download cards, misuse pairs), download buttons, and the
+ * hairline divider between 대분류 chapters. */
+
+/* Two-column grid that matches Notion's <columns>.
+ * `--gap` is 30px to match the (text+title)↔image spec from
+ * the Play Book composition guide. */
+.content-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin: 30px 0 0;
+}
+.content-cols .about-banner {
+  margin: 0;          /* the column wrapper supplies the gap */
+  aspect-ratio: 1 / 1; /* 2-grid Image Box ≈ 584×506 → use square */
+}
+
+/* Card column inside a 2-grid (.content-cols).
+ * `gap: 0` so child spacing is driven entirely by each child's
+ * own margin-top, matching the 1-grid rhythm:
+ *   - image → button = 8px (.content-download margin-top)
+ *   - button → next image = 30px (image-group separator) */
+.content-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+.content-card .about-banner {
+  margin: 0;
+  align-self: stretch;   /* image still fills the card width */
+}
+.content-card .about-banner:not(:first-child) {
+  margin-top: 30px;
+}
+.content-card h4 {
+  margin: 0;
+}
+
+/* Stack of .content-cols rows (e.g. 오용 사례) — the gap between
+ * sibling rows matches the global text → image gap (30px),
+ * doubled so the rows read as two distinct cases. */
+.content-cols + .content-cols {
+  margin-top: 60px;
+}
+
+/* Download button — Figma Play Book button spec:
+ * 14px Medium #08131A on #F5F5F5, padding 10px × 8px, radius 12.
+ * Block-aligned (left) so it sits as a standalone element under
+ * the image, matching the updated Notion structure where the
+ * H4 label was removed. */
+.content-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #F5F5F5;
+  color: #08131A;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  line-height: 1.4;
+  text-decoration: none;
+  margin: 8px 0 0;
+  transition: background var(--transition);
+}
+.content-download:hover {
+  background: #EDEDED;
+  color: #08131A;
+  text-decoration: none;
+}
+
+/* Hairline divider between 대분류 chapters (Notion's `---`). */
+.content-divider {
+  margin: 80px 0;
+  border: 0;
+  border-top: 1px solid var(--border-soft);
+}
+
 /* ── Principles list (4-up editorial grid) ──────────────── */
 
 .principles-grid {
@@ -1501,9 +1581,12 @@ code {
   .shell-main.has-toc { padding-right: 240px; }
 }
 
-/* Smooth hash navigation + offset top so section headings don't
- * jam against the viewport edge when jumped to. */
+/* Smooth hash navigation. `scroll-padding-top` is tuned to the
+ * same offset as `--content-pad-top` (90px) so that when the TOC
+ * jumps to a heading, the heading's box top lands where the page
+ * H1 normally sits — meaning the heading's visual cap-top lines
+ * up with the sidebar mode toggle's top edge at Y=100. */
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 24px;
+  scroll-padding-top: 90px;
 }
