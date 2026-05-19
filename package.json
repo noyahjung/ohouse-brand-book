@@ -1,0 +1,14 @@
+{
+  "name": "ohouse-brand-book",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:notion": "node scripts/notion-sync.js",
+    "sync:notion:one": "node scripts/notion-sync.js"
+  },
+  "devDependencies": {
+    "@notionhq/client": "^2.2.15",
+    "dotenv": "^16.4.5"
+  }
+}
