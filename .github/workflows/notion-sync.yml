@@ -1,0 +1,42 @@
+name: Notion sync
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes (UTC)
+  workflow_dispatch:           # manual "Run workflow" button
+
+permissions:
+  contents: write              # needed to push the regenerated HTML back
+
+concurrency:
+  group: notion-sync
+  cancel-in-progress: false    # don't cut a sync mid-write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: npm install
+
+      - name: Run Notion sync
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: node scripts/notion-sync.js
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name  "notion-sync-bot"
+          git config user.email "notion-sync-bot@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git commit -m "chore(notion): auto-sync $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
