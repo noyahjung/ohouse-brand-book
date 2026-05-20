@@ -124,7 +124,9 @@ function htmlEscape(s) {
 function richTextToHtml(richText = []) {
   return richText
     .map((rt) => {
-      let html = htmlEscape(rt.plain_text);
+      // Notion's shift+enter inserts a literal \n in plain_text.
+      // Convert to <br> so the soft line break survives in HTML.
+      let html = htmlEscape(rt.plain_text).replace(/\n/g, "<br>");
       const a = rt.annotations || {};
       if (a.code) html = `<code>${html}</code>`;
       if (a.bold) html = `<strong>${html}</strong>`;
