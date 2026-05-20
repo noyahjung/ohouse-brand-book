@@ -6,6 +6,14 @@
 
 export const PAGES = [
   {
+    id:     "365a597878a08198a2edcc935939bfb5",
+    title:  "홈",
+    path:   "index.html",
+    slug:   "home",
+    depth:  0,
+    page:   "home",
+  },
+  {
     id:     "365a597878a0810286e7e30c35f37b3c",
     title:  "로고",
     path:   "identity/logo.html",
