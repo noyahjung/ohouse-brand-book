@@ -940,6 +940,11 @@ code {
   object-fit: cover;
   display: block;
 }
+/* Symmetric gap below the image: text immediately after a banner
+ * sits 30px down, matching the 30px above the banner. */
+.about-banner + p {
+  margin-top: 30px;
+}
 
 .about-hero {
   padding: 0;
