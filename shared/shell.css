@@ -97,6 +97,9 @@ code {
   width: var(--sidebar-w);
   background: var(--bg);
   overflow-y: auto;
+  /* Hide scrollbar — sidebar content rarely needs scroll, and when
+   * it does the indicator adds visual noise to a quiet nav column. */
+  scrollbar-width: none;
   /* Container query host — the brand mark inside scales fluidly to
    * the sidebar's actual width via cqi units. */
   container-type: inline-size;
@@ -108,6 +111,7 @@ code {
   flex-direction: column;
   z-index: 40;
 }
+.shell-sidebar::-webkit-scrollbar { width: 0; height: 0; }
 
 /* Brand mark: small hexagon icon + "오늘의집 브랜드센터" wordmark.
  * "오늘의집" sits at 700, "브랜드센터" at 500 so the two read as a
