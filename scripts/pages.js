@@ -47,7 +47,7 @@ export const PAGES = [
   },
   {
     id:     "365a597878a08107b46decd73c3b52ba",
-    title:  "그래픽 원칙",
+    title:  "Overview",
     path:   "asset/graphic/principles.html",
     slug:   "graphic-principles",
     depth:  2,

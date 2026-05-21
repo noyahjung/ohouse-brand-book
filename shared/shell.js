@@ -22,7 +22,7 @@
 
 // Identity collects single long-scroll pages (로고/컬러/톤오브보이스).
 // Asset still expands 그래픽 into a toggle group whose children are
-// themselves long-scroll pages (그래픽 원칙/아이콘/2D/3D/사진 아이콘).
+// themselves long-scroll pages (Overview/아이콘/2D/3D/사진 아이콘).
 const NAV = [
   {
     title: 'Overview',
@@ -45,7 +45,7 @@ const NAV = [
       {
         kind: 'toggle', id: 'graphic', label: '그래픽',
         children: [
-          { id: 'graphic-principles', label: '그래픽 원칙',     href: 'asset/graphic/principles.html' },
+          { id: 'graphic-principles', label: 'Overview',       href: 'asset/graphic/principles.html' },
           { id: 'graphic-icon',       label: '아이콘',          href: 'asset/graphic/icon.html' },
           { id: 'graphic-2d',         label: '2D 그래픽 에셋',  href: 'asset/graphic/2d.html' },
           { id: 'graphic-3d',         label: '3D 그래픽 에셋',  href: 'asset/graphic/3d.html' },
