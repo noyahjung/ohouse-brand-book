@@ -6,3 +6,6 @@ figma-to-claude/
 # Notion sync
 .env
 node_modules/
+
+# Claude Code — machine-local settings stay per-machine
+.claude/settings.local.json
