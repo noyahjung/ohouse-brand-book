@@ -312,13 +312,32 @@ Figma Play Book 버튼 컴포넌트:
   letter-spacing: -0.3px;
   line-height: 1.4;
   text-decoration: none;
-  margin-top: 8px;               /* 직전 이미지와의 간격 */
+  margin-top: 8px;               /* 직전 이미지와의 간격 (기본) */
 }
 ```
 
 - **단독 요소로 배치** (이전 H4 라벨 + 버튼 묶음은 제거)
 - 버튼 텍스트가 라벨 역할 ("KR 브랜드 로고 다운로드", "오늘의집 키친 로고 다운로드" 등)
 - `.shell-content a:not(.cta-btn):not(.content-download)` 셀렉터로 본문 링크 underline에서 제외
+
+##### 여백 규칙 — 직전 요소에 따른 `margin-top`
+
+버튼 위에 무엇이 오는지로 상단 여백을 다르게 둔다. 텍스트와 버튼 사이는
+한 호흡 더 두어 액션이 본문에 묻히지 않게 한다.
+
+| 직전 요소 | `margin-top` | 의도 |
+|---|---|---|
+| `.about-banner` (이미지) | **8px** (기본) | 이미지 캡션처럼 바로 따라붙음 |
+| `p` (본문 단락) | **24px** | 텍스트→액션 전환에서 시각적 단락 분리 |
+
+```css
+/* 본문 텍스트 직후 버튼은 24px 위 여백 */
+.shell-content p + .content-download {
+  margin-top: 24px;
+}
+```
+
+같은 규칙은 다른 인라인 액션 버튼(예: 외부 채널 링크의 `.content-link`)에도 동일 적용.
 
 #### Divider (`.content-divider`)
 
